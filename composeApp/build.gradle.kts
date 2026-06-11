@@ -38,6 +38,7 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.transport.runtime)
             runtimeOnly(libs.slf4j.simple)
         }
         desktopTest.dependencies {
