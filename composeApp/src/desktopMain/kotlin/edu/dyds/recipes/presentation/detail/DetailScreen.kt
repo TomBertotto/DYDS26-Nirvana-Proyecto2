@@ -7,12 +7,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.dyds.recipes.presentation.utils.LoadingIndicator
 import edu.dyds.recipes.presentation.utils.NoResults
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,6 +24,8 @@ fun DetailScreen(
     onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(recipeId) {
         viewModel.getRecipeDetail(recipeId)
@@ -37,6 +41,19 @@ fun DetailScreen(
                     }
                 }
             )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            if (uiState.recipe != null) {
+                FloatingActionButton(
+                    onClick = {
+                        viewModel.addToWeeklyPlan()
+                        scope.launch { snackbarHostState.showSnackbar("Added to weekly plan") }
+                    }
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add to weekly plan")
+                }
+            }
         }
     ) { paddingValues ->
         when {
