@@ -8,14 +8,21 @@ import edu.dyds.recipes.data.external.proxy.OpenFoodFactsRecipeProxy
 import edu.dyds.recipes.data.external.proxy.TheMealDBRecipeProxy
 import edu.dyds.recipes.data.external.themealdb.TheMealDBRecipesExternalSource
 import edu.dyds.recipes.data.local.RecipesLocalDataSourceImpl
+import edu.dyds.recipes.data.local.WeeklyPlanFileLocalDataSource
 import edu.dyds.recipes.data.repository.RecipesRepositoryImpl
+import edu.dyds.recipes.data.repository.WeeklyPlanRepositoryImpl
 import edu.dyds.recipes.domain.qualifier.RecipeQualifier
+import edu.dyds.recipes.domain.usecase.AddRecipeToWeeklyPlanUseCaseImpl
 import edu.dyds.recipes.domain.usecase.GetDefaultRecipesUseCaseImpl
 import edu.dyds.recipes.domain.usecase.GetRecipeDetailsUseCaseImpl
+import edu.dyds.recipes.domain.usecase.GetWeeklyPlanUseCaseImpl
+import edu.dyds.recipes.domain.usecase.SaveWeeklyPlanUseCaseImpl
 import edu.dyds.recipes.domain.usecase.SearchRecipesByCategoryUseCaseImpl
 import edu.dyds.recipes.domain.usecase.SearchRecipesByNameUseCaseImpl
+import java.io.File
 import edu.dyds.recipes.presentation.detail.DetailViewModel
 import edu.dyds.recipes.presentation.home.HomeViewModel
+import edu.dyds.recipes.presentation.plan.WeeklyPlanViewModel
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpHeaders
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -79,9 +86,21 @@ object RecipesDependencyInjector {
     private val searchRecipesByNameUseCase = SearchRecipesByNameUseCaseImpl(recipesRepository, recipeQualifier)
     private val searchRecipesByCategoryUseCase = SearchRecipesByCategoryUseCaseImpl(recipesRepository, recipeQualifier)
 
+    private val weeklyPlanJson = Json {
+        prettyPrint = true
+        ignoreUnknownKeys = true
+    }
+    private val weeklyPlanFile = File(System.getProperty("user.dir"), ".recipes/weekly_plan.json")
+    private val weeklyPlanLocalDataSource = WeeklyPlanFileLocalDataSource(weeklyPlanFile, weeklyPlanJson)
+    private val weeklyPlanRepository = WeeklyPlanRepositoryImpl(weeklyPlanLocalDataSource)
+
+    private val getWeeklyPlanUseCase = GetWeeklyPlanUseCaseImpl(weeklyPlanRepository)
+    private val saveWeeklyPlanUseCase = SaveWeeklyPlanUseCaseImpl(weeklyPlanRepository)
+    private val addRecipeToWeeklyPlanUseCase = AddRecipeToWeeklyPlanUseCaseImpl(weeklyPlanRepository)
+
     @Composable
     fun getDetailViewModel(): DetailViewModel {
-        return viewModel { DetailViewModel(getRecipeDetailsUseCase) }
+        return viewModel { DetailViewModel(getRecipeDetailsUseCase, addRecipeToWeeklyPlanUseCase) }
     }
 
     @Composable
@@ -90,9 +109,15 @@ object RecipesDependencyInjector {
             HomeViewModel(
                 getDefaultRecipesUseCase = getDefaultRecipesUseCase,
                 searchRecipesByNameUseCase = searchRecipesByNameUseCase,
-                searchRecipesByCategoryUseCase = searchRecipesByCategoryUseCase
+                searchRecipesByCategoryUseCase = searchRecipesByCategoryUseCase,
+                addRecipeToWeeklyPlanUseCase = addRecipeToWeeklyPlanUseCase
             )
         }
+    }
+
+    @Composable
+    fun getWeeklyPlanViewModel(): WeeklyPlanViewModel {
+        return viewModel { WeeklyPlanViewModel(getWeeklyPlanUseCase) }
     }
 }
 
