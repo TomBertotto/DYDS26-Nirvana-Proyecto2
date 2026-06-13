@@ -2,6 +2,6 @@ package edu.dyds.recipes.domain.usecase
 
 import edu.dyds.recipes.domain.entity.Recipe
 
-interface GetRecipeDetailsUseCase {
-    suspend operator fun invoke(id: String): Recipe?
+interface AddRecipeToWeeklyPlanUseCase {
+    suspend operator fun invoke(recipe: Recipe)
 }
