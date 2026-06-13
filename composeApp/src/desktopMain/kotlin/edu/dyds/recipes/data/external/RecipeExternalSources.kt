@@ -6,7 +6,8 @@ interface RecipeDetailExternalSource {
     suspend fun getRecipeById(id: String): Recipe?
 }
 
-interface PopularRecipesExternalSource {
-    suspend fun getPopularRecipes(): List<Recipe>
+interface RecipesSearchExternalSource {
+    suspend fun getRecipesByName(name: String): List<Recipe>
+    suspend fun getRecipesByCategory(category: String): List<Recipe>
 }
 

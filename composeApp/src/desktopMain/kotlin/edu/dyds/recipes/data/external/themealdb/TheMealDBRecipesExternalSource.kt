@@ -1,13 +1,13 @@
 package edu.dyds.recipes.data.external.themealdb
 
-import edu.dyds.recipes.data.external.PopularRecipesExternalSource
+import edu.dyds.recipes.data.external.RecipesSearchExternalSource
 import edu.dyds.recipes.domain.entity.Recipe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-class TheMealDBRecipesExternalSource(private val theMealDBHttpClient: HttpClient) : PopularRecipesExternalSource {
+class TheMealDBRecipesExternalSource(private val theMealDBHttpClient: HttpClient) : RecipesSearchExternalSource {
 
     suspend fun getTheMealDBById(id: String): TheMealDBRemoteRecipe? {
         val response = theMealDBHttpClient
@@ -16,20 +16,31 @@ class TheMealDBRecipesExternalSource(private val theMealDBHttpClient: HttpClient
         return response.meals?.firstOrNull()
     }
 
-    private suspend fun getRecipeById(id: String): Recipe {
+    override suspend fun getRecipesByName(name: String): List<Recipe> {
         val response = theMealDBHttpClient
-            .get("lookup.php") { parameter("i", id) }
-            .body<Recipe>()
-        return response
-    }
-
-    override suspend fun getPopularRecipes(): List<Recipe> {
-        val summaryResponse = theMealDBHttpClient
-            .get("filter.php") { parameter("c", "Seafood") }
+            .get("search.php") { parameter("s", name) }
             .body<TheMealDBResponse>()
-
-        val ids = summaryResponse.meals?.map { it.idMeal } ?: return emptyList()
-
-        return ids.take(10).mapNotNull { id -> getRecipeById(id) }
+        return response.meals?.map { it.toDomain() } ?: emptyList()
     }
+
+    override suspend fun getRecipesByCategory(category: String): List<Recipe> {
+        val response = theMealDBHttpClient
+            .get("filter.php") { parameter("c", category) }
+            .body<TheMealDBResponse>()
+        return response.meals?.map { it.toDomain() } ?: emptyList()
+    }
+
+    private fun TheMealDBRemoteRecipe.toDomain() = Recipe(
+        id = idMeal,
+        name = strMeal,
+        description = strCategory.orEmpty(),
+        ingredients = ingredientList(),
+        instructions = strInstructions.orEmpty(),
+        image = strMealThumb.orEmpty(),
+        servings = 0,
+        prepTime = 0,
+        cookTime = 0,
+        calories = 0,
+        rating = 0.0
+    )
 }

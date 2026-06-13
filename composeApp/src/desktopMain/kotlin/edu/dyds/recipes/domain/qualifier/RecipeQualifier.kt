@@ -6,9 +6,12 @@ import edu.dyds.recipes.domain.entity.Recipe
 class RecipeQualifier {
     fun qualifyRecipes(recipes: List<Recipe>): List<QualifiedRecipe> {
         return recipes
-            .filter { it.rating >= 4.0 }
-            .map { QualifiedRecipe(it, isGoodRecipe = true) }
+            .map { QualifiedRecipe(it, isGoodRecipe = it.rating >= GOOD_RATING_THRESHOLD) }
             .sortedByDescending { it.recipe.rating }
+    }
+
+    companion object {
+        private const val GOOD_RATING_THRESHOLD = 4.0
     }
 }
 

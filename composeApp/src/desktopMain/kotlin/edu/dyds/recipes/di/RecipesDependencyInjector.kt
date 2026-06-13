@@ -10,8 +10,10 @@ import edu.dyds.recipes.data.external.themealdb.TheMealDBRecipesExternalSource
 import edu.dyds.recipes.data.local.RecipesLocalDataSourceImpl
 import edu.dyds.recipes.data.repository.RecipesRepositoryImpl
 import edu.dyds.recipes.domain.qualifier.RecipeQualifier
-import edu.dyds.recipes.domain.usecase.GetPopularRecipesUseCaseImpl
+import edu.dyds.recipes.domain.usecase.GetDefaultRecipesUseCaseImpl
 import edu.dyds.recipes.domain.usecase.GetRecipeDetailsUseCaseImpl
+import edu.dyds.recipes.domain.usecase.SearchRecipesByCategoryUseCaseImpl
+import edu.dyds.recipes.domain.usecase.SearchRecipesByNameUseCaseImpl
 import edu.dyds.recipes.presentation.detail.DetailViewModel
 import edu.dyds.recipes.presentation.home.HomeViewModel
 import io.ktor.client.HttpClient
@@ -68,12 +70,14 @@ object RecipesDependencyInjector {
 
     private val recipesRepository = RecipesRepositoryImpl(
         recipeDetailExternalSource = recipeExternalSourceBroker,
-        popularRecipesExternalSource = themealdbDataSource,
+        recipesSearchExternalSource = themealdbDataSource,
         localDataSource = localDataSource
     )
 
     private val getRecipeDetailsUseCase = GetRecipeDetailsUseCaseImpl(recipesRepository)
-    private val getPopularRecipesUseCase = GetPopularRecipesUseCaseImpl(recipesRepository, recipeQualifier)
+    private val getDefaultRecipesUseCase = GetDefaultRecipesUseCaseImpl(recipesRepository, recipeQualifier)
+    private val searchRecipesByNameUseCase = SearchRecipesByNameUseCaseImpl(recipesRepository, recipeQualifier)
+    private val searchRecipesByCategoryUseCase = SearchRecipesByCategoryUseCaseImpl(recipesRepository, recipeQualifier)
 
     @Composable
     fun getDetailViewModel(): DetailViewModel {
@@ -82,7 +86,13 @@ object RecipesDependencyInjector {
 
     @Composable
     fun getHomeViewModel(): HomeViewModel {
-        return viewModel { HomeViewModel(getPopularRecipesUseCase) }
+        return viewModel {
+            HomeViewModel(
+                getDefaultRecipesUseCase = getDefaultRecipesUseCase,
+                searchRecipesByNameUseCase = searchRecipesByNameUseCase,
+                searchRecipesByCategoryUseCase = searchRecipesByCategoryUseCase
+            )
+        }
     }
 }
 

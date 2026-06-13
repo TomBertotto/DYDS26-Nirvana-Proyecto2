@@ -4,17 +4,15 @@ import edu.dyds.recipes.domain.entity.QualifiedRecipe
 import edu.dyds.recipes.domain.qualifier.RecipeQualifier
 import edu.dyds.recipes.domain.repository.RecipesRepository
 
-interface GetPopularRecipesUseCase {
+interface GetDefaultRecipesUseCase {
     suspend operator fun invoke(): List<QualifiedRecipe>
 }
 
-internal class GetPopularRecipesUseCaseImpl(
+internal class GetDefaultRecipesUseCaseImpl(
     private val repository: RecipesRepository,
     private val qualifier: RecipeQualifier
-) : GetPopularRecipesUseCase {
+) : GetDefaultRecipesUseCase {
     override suspend fun invoke(): List<QualifiedRecipe> {
-        val recipes = repository.getPopularRecipes()
-        return qualifier.qualifyRecipes(recipes)
+        return qualifier.qualifyRecipes(repository.getDefaultRecipes())
     }
 }
-

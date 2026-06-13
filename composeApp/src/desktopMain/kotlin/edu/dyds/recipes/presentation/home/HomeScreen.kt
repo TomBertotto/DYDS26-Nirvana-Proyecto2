@@ -6,13 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.dyds.recipes.domain.entity.QualifiedRecipe
 import edu.dyds.recipes.presentation.utils.LoadingIndicator
 import edu.dyds.recipes.presentation.utils.NoResults
+
+private enum class SearchMode { NAME, CATEGORY }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,13 +29,87 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Popular Recipes") })
+            TopAppBar(title = { Text("Recipes") })
         }
     ) { paddingValues ->
-        when {
-            uiState.isLoading -> LoadingIndicator()
-            uiState.recipes.isEmpty() -> NoResults()
-            else -> RecipeList(uiState.recipes, onRecipeClick, Modifier.padding(paddingValues))
+        Column(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
+            SearchSection(
+                onSearchByName = viewModel::searchByName,
+                onSearchByCategory = viewModel::searchByCategory,
+                onClear = viewModel::loadDefaultRecipes
+            )
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                when {
+                    uiState.isLoading -> LoadingIndicator()
+                    uiState.recipes.isEmpty() -> NoResults()
+                    else -> RecipeList(uiState.recipes, onRecipeClick, Modifier.fillMaxSize())
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SearchSection(
+    onSearchByName: (String) -> Unit,
+    onSearchByCategory: (String) -> Unit,
+    onClear: () -> Unit
+) {
+    var query by remember { mutableStateOf("") }
+    var mode by remember { mutableStateOf(SearchMode.NAME) }
+
+    Column(
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = query,
+            onValueChange = { query = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Search recipes") },
+            singleLine = true,
+            trailingIcon = {
+                if (query.isNotBlank()) {
+                    IconButton(
+                        onClick = {
+                            query = ""
+                            onClear()
+                        }
+                    ) {
+                        Icon(Icons.Default.Clear, contentDescription = "Clear")
+                    }
+                }
+            }
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            FilterChip(
+                selected = mode == SearchMode.NAME,
+                onClick = { mode = SearchMode.NAME },
+                label = { Text("By name") }
+            )
+            FilterChip(
+                selected = mode == SearchMode.CATEGORY,
+                onClick = { mode = SearchMode.CATEGORY },
+                label = { Text("By category") }
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Button(
+                onClick = {
+                    val trimmed = query.trim()
+                    when {
+                        trimmed.isBlank() -> onClear()
+                        mode == SearchMode.NAME -> onSearchByName(trimmed)
+                        else -> onSearchByCategory(trimmed)
+                    }
+                }
+            ) {
+                Text("Search")
+            }
         }
     }
 }
@@ -77,4 +156,3 @@ private fun RecipeCard(
         }
     }
 }
-
