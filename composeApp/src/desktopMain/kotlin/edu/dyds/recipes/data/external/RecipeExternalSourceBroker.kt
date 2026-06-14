@@ -1,6 +1,9 @@
 package edu.dyds.recipes.data.external
 
+import edu.dyds.recipes.data.external.utils.ingredientNameFrom
+import edu.dyds.recipes.data.external.utils.ingredientWeightMultiplier
 import edu.dyds.recipes.domain.entity.Recipe
+import kotlin.math.roundToInt
 
 class RecipeExternalSourceBroker(
     private val openFoodFactsRecipeSource: RecipeDetailExternalSource,
@@ -8,23 +11,30 @@ class RecipeExternalSourceBroker(
 ) : RecipeDetailExternalSource {
 
     override suspend fun getRecipeById(id: String): Recipe? {
-        val openFoodFactsRecipe = runCatching { openFoodFactsRecipeSource.getRecipeById(id) }.getOrNull()
         val themealdbRecipe = runCatching { themealdbRecipeSource.getRecipeById(id) }.getOrNull()
 
-        return when {
-            openFoodFactsRecipe != null && themealdbRecipe != null -> mergeRecipes(openFoodFactsRecipe, themealdbRecipe)
-            openFoodFactsRecipe != null -> openFoodFactsRecipe.copy(description = "OpenFoodFacts: ${openFoodFactsRecipe.description}")
-            themealdbRecipe != null -> themealdbRecipe.copy(description = "TheMealDB: ${themealdbRecipe.description}")
-            else -> null
-        }
+        return themealdbRecipe?.let { completeRecipeWithIngredientCalories(it) }
+            ?: runCatching { openFoodFactsRecipeSource.getRecipeById(id) }.getOrNull()
+                ?.let { it.copy(description = "OpenFoodFacts: ${it.description}") }
     }
 
-    private fun mergeRecipes(openFoodFacts: Recipe, themealdb: Recipe): Recipe {
-        return themealdb.copy(
-            description = "TheMealDB: ${themealdb.description}\n\nOpenFoodFacts: ${openFoodFacts.description}",
-            calories = (openFoodFacts.calories + themealdb.calories) / 2,
-            rating = (openFoodFacts.rating + themealdb.rating) / 2.0
+    private suspend fun completeRecipeWithIngredientCalories(recipe: Recipe): Recipe {
+        val ingredientCalories = recipe.ingredients
+            .distinct()
+            .sumOf { calorieContributionFrom(it) }
+
+        return recipe.copy(
+            description = "TheMealDB: ${recipe.description}",
+            calories = ingredientCalories
         )
     }
-}
 
+    private suspend fun calorieContributionFrom(ingredient: String): Int {
+        val ingredientName = ingredientNameFrom(ingredient) ?: return 0
+        val caloriesPer100g = runCatching {
+            openFoodFactsRecipeSource.getRecipeById(ingredientName)?.calories ?: 0
+        }.getOrDefault(0)
+
+        return (caloriesPer100g * ingredientWeightMultiplier(ingredient)).roundToInt()
+    }
+}

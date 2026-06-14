@@ -61,9 +61,8 @@ object RecipesDependencyInjector {
         }
     }
 
-
     private val themealdbDataSource = TheMealDBRecipesExternalSource(theMealDbHttpClient)
-    private val openFoodFactsDataSource = OpenFoodFactsRecipesExternalSource(openFoodFactsHttpClient = openFoodFactsHttpClient)
+    private val openFoodFactsDataSource = OpenFoodFactsRecipesExternalSource(openFoodFactsHttpClient)
     private val openFoodFactsProxy = OpenFoodFactsRecipeProxy(openFoodFactsDataSource)
 
     private val theMealDBProxy = TheMealDBRecipeProxy(themealdbDataSource)

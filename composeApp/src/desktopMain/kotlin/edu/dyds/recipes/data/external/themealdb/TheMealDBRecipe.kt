@@ -46,7 +46,6 @@ data class TheMealDBRemoteRecipe(
     @SerialName("strMeasure14")     val strMeasure14: String?,
     @SerialName("strMeasure15")     val strMeasure15: String?,
 ) {
-    /** Combina ingredientes y medidas descartando los pares vacíos. */
     fun ingredientList(): List<String> {
         val ingredients = listOf(
             strIngredient1, strIngredient2, strIngredient3, strIngredient4, strIngredient5,

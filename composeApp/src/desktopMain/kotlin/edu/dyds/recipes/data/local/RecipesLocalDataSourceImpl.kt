@@ -1,12 +1,7 @@
 package edu.dyds.recipes.data.local
 
+import edu.dyds.recipes.data.repository.RecipesLocalDataSource
 import edu.dyds.recipes.domain.entity.Recipe
-
-interface RecipesLocalDataSource {
-    suspend fun saveRecipes(recipes: List<Recipe>)
-    suspend fun getRecipeById(id: String): Recipe?
-    suspend fun getAllRecipes(): List<Recipe>
-}
 
 class RecipesLocalDataSourceImpl : RecipesLocalDataSource {
     private val recipeCache = mutableMapOf<String, Recipe>()

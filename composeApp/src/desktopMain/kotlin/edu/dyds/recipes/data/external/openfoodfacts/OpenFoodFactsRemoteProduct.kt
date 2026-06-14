@@ -9,21 +9,26 @@ data class OpenFoodFactsResponse(
 )
 
 @Serializable
+data class OpenFoodFactsSearchResponse(
+    @SerialName("products") val products: List<OpenFoodFactsRemoteProduct> = emptyList()
+)
+
+@Serializable
 data class OpenFoodFactsRemoteProduct(
-    @SerialName("id")                   val id: String,
-    @SerialName("product_name")         val productName: String?,
-    @SerialName("generic_name")         val genericName: String?,
-    @SerialName("ingredients_text")     val ingredientsText: String?,
-    @SerialName("image_url")            val imageUrl: String?,
-    @SerialName("serving_quantity")     val servingQuantity: String?,
-    @SerialName("preparation_time")     val preparationTime: String?,
-    @SerialName("nutriments")           val nutriments: OpenFoodFactsNutriments?,
-    @SerialName("ecoscore_grade")       val ecoscoreGrade: String?,
-    @SerialName("nutriscore_grade")     val nutriscoreGrade: String?,
+    @SerialName("code")                 val id: String = "",
+    @SerialName("product_name")         val productName: String? = null,
+    @SerialName("generic_name")         val genericName: String? = null,
+    @SerialName("ingredients_text")     val ingredientsText: String? = null,
+    @SerialName("image_url")            val imageUrl: String? = null,
+    @SerialName("serving_quantity")     val servingQuantity: String? = null,
+    @SerialName("preparation_time")     val preparationTime: String? = null,
+    @SerialName("nutriments")           val nutriments: OpenFoodFactsNutriments? = null,
+    @SerialName("ecoscore_grade")       val ecoscoreGrade: String? = null,
+    @SerialName("nutriscore_grade")     val nutriscoreGrade: String? = null,
 )
 
 @Serializable
 data class OpenFoodFactsNutriments(
-    @SerialName("energy-kcal_serving") val energyKcalServing: Double?,
-    @SerialName("energy-kcal_100g")    val energyKcal100g: Double?,
+    @SerialName("energy-kcal_serving") val energyKcalServing: Double? = null,
+    @SerialName("energy-kcal_100g")    val energyKcal100g: Double? = null,
 )

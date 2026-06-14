@@ -1,46 +1,47 @@
 package edu.dyds.recipes.data.external.themealdb
 
 import edu.dyds.recipes.data.external.RecipesSearchExternalSource
+import edu.dyds.recipes.data.external.utils.toDomain
 import edu.dyds.recipes.domain.entity.Recipe
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 
-class TheMealDBRecipesExternalSource(private val theMealDBHttpClient: HttpClient) : RecipesSearchExternalSource {
+class TheMealDBRecipesExternalSource(private val httpClient: HttpClient) : RecipesSearchExternalSource {
 
     suspend fun getTheMealDBById(id: String): TheMealDBRemoteRecipe? {
-        val response = theMealDBHttpClient
-            .get("lookup.php") { parameter("i", id) }
-            .body<TheMealDBResponse>()
-        return response.meals?.firstOrNull()
+        return fetchMeals(LOOKUP_ENDPOINT, ID_PARAMETER, id).firstOrNull()
     }
 
     override suspend fun getRecipesByName(name: String): List<Recipe> {
-        val response = theMealDBHttpClient
-            .get("search.php") { parameter("s", name) }
-            .body<TheMealDBResponse>()
-        return response.meals?.map { it.toDomain() } ?: emptyList()
+        return fetchRecipes(SEARCH_ENDPOINT, SEARCH_PARAMETER, name)
     }
 
     override suspend fun getRecipesByCategory(category: String): List<Recipe> {
-        val response = theMealDBHttpClient
-            .get("filter.php") { parameter("c", category) }
-            .body<TheMealDBResponse>()
-        return response.meals?.map { it.toDomain() } ?: emptyList()
+        return fetchRecipes(FILTER_ENDPOINT, CATEGORY_PARAMETER, category)
     }
 
-    private fun TheMealDBRemoteRecipe.toDomain() = Recipe(
-        id = idMeal,
-        name = strMeal,
-        description = strCategory.orEmpty(),
-        ingredients = ingredientList(),
-        instructions = strInstructions.orEmpty(),
-        image = strMealThumb.orEmpty(),
-        servings = 0,
-        prepTime = 0,
-        cookTime = 0,
-        calories = 0,
-        rating = 0.0
-    )
+    private suspend fun fetchRecipes(endpoint: String, parameterName: String, parameterValue: String): List<Recipe> {
+        return fetchMeals(endpoint, parameterName, parameterValue)
+            .map { it.toDomain() }
+    }
+
+    private suspend fun fetchMeals(endpoint: String, parameterName: String, parameterValue: String): List<TheMealDBRemoteRecipe> {
+        val response = httpClient
+            .get(endpoint) { parameter(parameterName, parameterValue) }
+            .body<TheMealDBResponse>()
+
+        return response.meals.orEmpty()
+    }
+
+    private companion object {
+        const val LOOKUP_ENDPOINT = "lookup.php"
+        const val SEARCH_ENDPOINT = "search.php"
+        const val FILTER_ENDPOINT = "filter.php"
+
+        const val ID_PARAMETER = "i"
+        const val SEARCH_PARAMETER = "s"
+        const val CATEGORY_PARAMETER = "c"
+    }
 }
