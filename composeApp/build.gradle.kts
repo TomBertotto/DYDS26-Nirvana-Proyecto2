@@ -57,11 +57,11 @@ kotlin {
 
 compose.desktop {
     application {
-        mainClass = "edu.dyds.recipes.MainKt"
+        mainClass = "edu.dyds.countries.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "edu.dyds.recipes"
+            packageName = "edu.dyds.countries"
             packageVersion = "1.0.0"
         }
     }
@@ -69,7 +69,7 @@ compose.desktop {
 
 tasks.withType<JavaExec>().configureEach {
     if (name == "desktopRun") {
-        mainClass.set("edu.dyds.recipes.MainKt")
+        mainClass.set("edu.dyds.countries.MainKt")
     }
 }
 

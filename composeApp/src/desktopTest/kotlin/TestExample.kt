@@ -1,4 +1,4 @@
-package edu.dyds.recipes
+package edu.dyds.countries
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,4 +9,3 @@ class TestExample {
         assertEquals(4, 2 + 2)
     }
 }
-
