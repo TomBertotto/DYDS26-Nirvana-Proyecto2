@@ -164,13 +164,17 @@ private fun RecipeCard(
             .padding(8.dp)
             .clickable { onRecipeClick(qualifiedRecipe) }
     ) {
-        Column {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             RecipeImage(
                 imageUrl = recipe.image,
                 contentDescription = recipe.name,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.width(112.dp),
+                height = 84.dp
             )
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(recipe.name, style = MaterialTheme.typography.headlineSmall)
                 Text(recipe.description, style = MaterialTheme.typography.bodyMedium)
                 Text("Rating: ${recipe.rating}", style = MaterialTheme.typography.labelSmall)

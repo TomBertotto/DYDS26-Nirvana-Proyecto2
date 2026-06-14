@@ -3,6 +3,9 @@ package edu.dyds.recipes.data.external
 import edu.dyds.recipes.data.external.utils.ingredientNameFrom
 import edu.dyds.recipes.data.external.utils.ingredientWeightMultiplier
 import edu.dyds.recipes.domain.entity.Recipe
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlin.math.roundToInt
 
 class RecipeExternalSourceBroker(
@@ -18,15 +21,18 @@ class RecipeExternalSourceBroker(
                 ?.let { it.copy(description = "OpenFoodFacts: ${it.description}") }
     }
 
-    private suspend fun completeRecipeWithIngredientCalories(recipe: Recipe): Recipe {
-        val ingredientCalories = recipe.ingredients
+    private suspend fun completeRecipeWithIngredientCalories(recipe: Recipe): Recipe = coroutineScope {
+        val imageDeferred = async {
+            runCatching { openFoodFactsRecipeSource.getRecipeById(recipe.name)?.image }.getOrNull()
+        }
+        val calorieDeferreds = recipe.ingredients
             .distinct()
-            .sumOf { calorieContributionFrom(it) }
-        val openFoodFactsImage = runCatching {
-            openFoodFactsRecipeSource.getRecipeById(recipe.name)?.image
-        }.getOrNull()
+            .map { ingredient -> async { calorieContributionFrom(ingredient) } }
 
-        return recipe.copy(
+        val ingredientCalories = calorieDeferreds.awaitAll().sum()
+        val openFoodFactsImage = imageDeferred.await()
+
+        recipe.copy(
             description = "TheMealDB: ${recipe.description}",
             servings = recipe.servings,
             image = openFoodFactsImage?.takeIf { it.isNotBlank() } ?: recipe.image,

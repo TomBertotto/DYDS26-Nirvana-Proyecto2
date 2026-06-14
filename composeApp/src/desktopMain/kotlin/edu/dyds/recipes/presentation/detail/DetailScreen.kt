@@ -73,16 +73,22 @@ private fun RecipeDetails(recipe: edu.dyds.recipes.domain.entity.Recipe, modifie
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(recipe.name, style = MaterialTheme.typography.headlineLarge)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        RecipeImage(
-            imageUrl = recipe.image,
-            contentDescription = recipe.name,
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            height = 260.dp
-        )
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            RecipeImage(
+                imageUrl = recipe.image,
+                contentDescription = recipe.name,
+                modifier = Modifier.width(112.dp),
+                height = 84.dp
+            )
+            Text(
+                recipe.name,
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.weight(1f)
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
