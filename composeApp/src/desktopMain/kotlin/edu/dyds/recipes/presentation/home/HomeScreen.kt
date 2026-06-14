@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import edu.dyds.recipes.domain.entity.QualifiedRecipe
 import edu.dyds.recipes.presentation.utils.LoadingIndicator
 import edu.dyds.recipes.presentation.utils.NoResults
+import edu.dyds.recipes.presentation.utils.RecipeImage
 import kotlinx.coroutines.launch
 
 private enum class SearchMode { NAME, CATEGORY }
@@ -163,28 +164,35 @@ private fun RecipeCard(
             .padding(8.dp)
             .clickable { onRecipeClick(qualifiedRecipe) }
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(recipe.name, style = MaterialTheme.typography.headlineSmall)
-            Text(recipe.description, style = MaterialTheme.typography.bodyMedium)
-            Text("Rating: ${recipe.rating}", style = MaterialTheme.typography.labelSmall)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("Servings: ${recipe.servings}")
-                Text("Prep: ${recipe.prepTime}m")
-                Text("Cook: ${recipe.cookTime}m")
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = { onAddToPlan(qualifiedRecipe) }) {
-                    Icon(Icons.Default.Add, contentDescription = null)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Add to plan")
+        Column {
+            RecipeImage(
+                imageUrl = recipe.image,
+                contentDescription = recipe.name,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(recipe.name, style = MaterialTheme.typography.headlineSmall)
+                Text(recipe.description, style = MaterialTheme.typography.bodyMedium)
+                Text("Rating: ${recipe.rating}", style = MaterialTheme.typography.labelSmall)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Servings: ${recipe.servings}")
+                    Text("Prep: ${recipe.prepTime}m")
+                    Text("Cook: ${recipe.cookTime}m")
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { onAddToPlan(qualifiedRecipe) }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Add to plan")
+                    }
                 }
             }
         }

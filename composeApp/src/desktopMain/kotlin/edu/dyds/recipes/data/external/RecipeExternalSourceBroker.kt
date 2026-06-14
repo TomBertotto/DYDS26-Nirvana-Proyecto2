@@ -22,9 +22,14 @@ class RecipeExternalSourceBroker(
         val ingredientCalories = recipe.ingredients
             .distinct()
             .sumOf { calorieContributionFrom(it) }
+        val openFoodFactsImage = runCatching {
+            openFoodFactsRecipeSource.getRecipeById(recipe.name)?.image
+        }.getOrNull()
 
         return recipe.copy(
             description = "TheMealDB: ${recipe.description}",
+            servings = recipe.servings,
+            image = openFoodFactsImage?.takeIf { it.isNotBlank() } ?: recipe.image,
             calories = ingredientCalories
         )
     }

@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.dyds.recipes.presentation.utils.LoadingIndicator
 import edu.dyds.recipes.presentation.utils.NoResults
+import edu.dyds.recipes.presentation.utils.RecipeImage
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +76,15 @@ private fun RecipeDetails(recipe: edu.dyds.recipes.domain.entity.Recipe, modifie
         Text(recipe.name, style = MaterialTheme.typography.headlineLarge)
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        RecipeImage(
+            imageUrl = recipe.image,
+            contentDescription = recipe.name,
+            modifier = Modifier.fillMaxWidth(),
+            height = 260.dp
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text("Description: ${recipe.description}", style = MaterialTheme.typography.bodyMedium)
 

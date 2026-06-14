@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import edu.dyds.recipes.domain.entity.Recipe
 import edu.dyds.recipes.presentation.utils.LoadingIndicator
+import edu.dyds.recipes.presentation.utils.RecipeImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,9 +74,20 @@ private fun WeeklyPlanCard(
             .padding(8.dp)
             .clickable { onRecipeClick(recipe) }
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(recipe.name, style = MaterialTheme.typography.headlineSmall)
-            Text(recipe.description, style = MaterialTheme.typography.bodyMedium)
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            RecipeImage(
+                imageUrl = recipe.image,
+                contentDescription = recipe.name,
+                modifier = Modifier.width(112.dp),
+                height = 84.dp
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(recipe.name, style = MaterialTheme.typography.headlineSmall)
+                Text(recipe.description, style = MaterialTheme.typography.bodyMedium)
+            }
         }
     }
 }
