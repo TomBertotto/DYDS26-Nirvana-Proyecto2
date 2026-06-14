@@ -9,5 +9,7 @@ data class Country(
     val subregion: String,
     val population: Long,
     val flagPng: String,
-    val flagEmoji: String
+    val flagEmoji: String,
+    val capitalLatitude: Double?,
+    val capitalLongitude: Double?
 )

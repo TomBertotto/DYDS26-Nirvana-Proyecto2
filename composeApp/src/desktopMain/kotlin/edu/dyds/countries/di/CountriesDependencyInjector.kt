@@ -2,9 +2,12 @@ package edu.dyds.countries.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import edu.dyds.countries.data.external.openmeteo.OpenMeteoWeatherExternalSource
 import edu.dyds.countries.data.external.restcountries.RestCountriesExternalSource
 import edu.dyds.countries.data.local.CountriesLocalDataSourceImpl
 import edu.dyds.countries.data.repository.CountriesRepositoryImpl
+import edu.dyds.countries.data.repository.WeatherRepositoryImpl
+import edu.dyds.countries.domain.usecase.GetCapitalWeatherUseCaseImpl
 import edu.dyds.countries.domain.usecase.GetCountryDetailsUseCaseImpl
 import edu.dyds.countries.domain.usecase.SearchCountriesUseCaseImpl
 import edu.dyds.countries.presentation.detail.DetailViewModel
@@ -24,6 +27,7 @@ object CountriesDependencyInjector {
     }
 
     private val restCountriesExternalSource = RestCountriesExternalSource(httpClient)
+    private val openMeteoWeatherExternalSource = OpenMeteoWeatherExternalSource(httpClient)
 
     private val localDataSource = CountriesLocalDataSourceImpl()
 
@@ -33,12 +37,15 @@ object CountriesDependencyInjector {
         localDataSource = localDataSource
     )
 
+    private val weatherRepository = WeatherRepositoryImpl(openMeteoWeatherExternalSource)
+
     private val searchCountriesUseCase = SearchCountriesUseCaseImpl(countriesRepository)
     private val getCountryDetailsUseCase = GetCountryDetailsUseCaseImpl(countriesRepository)
+    private val getCapitalWeatherUseCase = GetCapitalWeatherUseCaseImpl(weatherRepository)
 
     @Composable
     fun getDetailViewModel(): DetailViewModel {
-        return viewModel { DetailViewModel(getCountryDetailsUseCase) }
+        return viewModel { DetailViewModel(getCountryDetailsUseCase, getCapitalWeatherUseCase) }
     }
 
     @Composable
