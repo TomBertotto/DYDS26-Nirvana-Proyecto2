@@ -2,38 +2,39 @@ package edu.dyds.countries.di
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import edu.dyds.countries.data.external.CountryExternalSourceBroker
-import edu.dyds.countries.data.external.openmeteo.OpenMeteoExternalSource
 import edu.dyds.countries.data.external.restcountries.RestCountriesExternalSource
 import edu.dyds.countries.data.local.CountriesLocalDataSourceImpl
 import edu.dyds.countries.data.repository.CountriesRepositoryImpl
-import edu.dyds.countries.domain.qualifier.CountryQualifier
-import edu.dyds.countries.domain.usecase.GetAllCountriesUseCaseImpl
 import edu.dyds.countries.domain.usecase.GetCountryDetailsUseCaseImpl
+import edu.dyds.countries.domain.usecase.SearchCountriesUseCaseImpl
 import edu.dyds.countries.presentation.detail.DetailViewModel
 import edu.dyds.countries.presentation.home.HomeViewModel
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 object CountriesDependencyInjector {
 
-    private val restCountriesDataSource = RestCountriesExternalSource()
-    private val openMeteoDataSource = OpenMeteoExternalSource()
+    private val httpClient = HttpClient(OkHttp) {
+        install(ContentNegotiation) {
+            json(Json { ignoreUnknownKeys = true })
+        }
+    }
 
-    private val countryExternalSourceBroker = CountryExternalSourceBroker(
-        openMeteoSource = openMeteoDataSource,
-        restCountriesSource = restCountriesDataSource
-    )
+    private val restCountriesExternalSource = RestCountriesExternalSource(httpClient)
 
     private val localDataSource = CountriesLocalDataSourceImpl()
-    private val countryQualifier = CountryQualifier()
 
     private val countriesRepository = CountriesRepositoryImpl(
-        countryDetailExternalSource = countryExternalSourceBroker,
-        allCountriesExternalSource = restCountriesDataSource,
+        countriesSearchExternalSource = restCountriesExternalSource,
+        countryDetailExternalSource = restCountriesExternalSource,
         localDataSource = localDataSource
     )
 
+    private val searchCountriesUseCase = SearchCountriesUseCaseImpl(countriesRepository)
     private val getCountryDetailsUseCase = GetCountryDetailsUseCaseImpl(countriesRepository)
-    private val getAllCountriesUseCase = GetAllCountriesUseCaseImpl(countriesRepository, countryQualifier)
 
     @Composable
     fun getDetailViewModel(): DetailViewModel {
@@ -42,6 +43,6 @@ object CountriesDependencyInjector {
 
     @Composable
     fun getHomeViewModel(): HomeViewModel {
-        return viewModel { HomeViewModel(getAllCountriesUseCase) }
+        return viewModel { HomeViewModel(searchCountriesUseCase) }
     }
 }

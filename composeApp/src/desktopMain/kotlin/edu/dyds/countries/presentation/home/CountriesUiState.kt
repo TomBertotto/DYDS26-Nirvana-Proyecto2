@@ -1,8 +1,9 @@
 package edu.dyds.countries.presentation.home
 
-import edu.dyds.countries.domain.entity.QualifiedCountry
+import edu.dyds.countries.domain.entity.Country
 
 data class CountriesUiState(
-    val countries: List<QualifiedCountry> = emptyList(),
+    val query: String = "",
+    val countries: List<Country> = emptyList(),
     val isLoading: Boolean = false
 )

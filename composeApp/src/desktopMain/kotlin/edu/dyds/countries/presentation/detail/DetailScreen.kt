@@ -11,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import edu.dyds.countries.domain.entity.Country
+import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
 import edu.dyds.countries.presentation.utils.NoResults
 
@@ -48,46 +50,40 @@ fun DetailScreen(
 }
 
 @Composable
-private fun CountryDetails(country: edu.dyds.countries.domain.entity.Country, modifier: Modifier) {
+private fun CountryDetails(country: Country, modifier: Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
+        FlagImage(
+            url = country.flagPng,
+            contentDescription = country.name,
+            modifier = Modifier.fillMaxWidth().height(180.dp)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         Text(country.name, style = MaterialTheme.typography.headlineLarge)
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text("Description: ${country.description}", style = MaterialTheme.typography.bodyMedium)
+        Text(country.officialName, style = MaterialTheme.typography.titleMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
-        country.ingredients.forEach { ingredient ->
-            Text("• $ingredient", modifier = Modifier.padding(start = 8.dp))
-        }
+        DetailRow("Capital", country.capital)
+        DetailRow("Region", country.region)
+        DetailRow("Subregion", country.subregion)
+        DetailRow("Population", country.population.toString())
+    }
+}
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text("Instructions:", style = MaterialTheme.typography.titleMedium)
-        Text(country.instructions, modifier = Modifier.padding(start = 8.dp))
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text("Servings: ${country.servings}", style = MaterialTheme.typography.bodySmall)
-                Text("Prep: ${country.prepTime}m", style = MaterialTheme.typography.bodySmall)
-                Text("Cook: ${country.cookTime}m", style = MaterialTheme.typography.bodySmall)
-            }
-            Column(Modifier.weight(1f)) {
-                Text("Calories: ${country.calories}", style = MaterialTheme.typography.bodySmall)
-                Text("Rating: ${country.rating}", style = MaterialTheme.typography.bodySmall)
-            }
-        }
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("$label:", style = MaterialTheme.typography.bodyMedium)
+        Text(value.ifBlank { "—" }, style = MaterialTheme.typography.bodyMedium)
     }
 }

@@ -39,7 +39,7 @@ private fun NavGraphBuilder.homeDestination(navController: NavHostController, ho
         HomeScreen(
             viewModel = homeViewModel,
             onCountryClick = {
-                navController.navigate("$DETAIL/${it.country.id}")
+                navController.navigate("$DETAIL/${it.id}")
             }
         )
     }

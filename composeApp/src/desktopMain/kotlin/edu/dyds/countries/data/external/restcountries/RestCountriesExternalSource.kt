@@ -1,54 +1,33 @@
 package edu.dyds.countries.data.external.restcountries
 
-import edu.dyds.countries.data.external.AllCountriesExternalSource
+import edu.dyds.countries.data.external.CountriesSearchExternalSource
 import edu.dyds.countries.data.external.CountryDetailExternalSource
 import edu.dyds.countries.domain.entity.Country
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 
-class RestCountriesExternalSource : CountryDetailExternalSource, AllCountriesExternalSource {
-    override suspend fun getCountryById(id: String): Country? {
-        return Country(
-            id = id,
-            name = "Pasta Carbonara",
-            description = "Classic Italian pasta dish",
-            ingredients = listOf("pasta", "eggs", "bacon", "cheese"),
-            instructions = "1. Cook pasta\n2. Mix eggs with cheese\n3. Combine",
-            image = "",
-            servings = 4,
-            prepTime = 10,
-            cookTime = 20,
-            calories = 400,
-            rating = 4.5
-        )
+private const val BASE_URL = "https://api.restcountries.com/countries/v5"
+private const val API_KEY = "rc_live_87079071953942419c75bc712890f652"
+
+class RestCountriesExternalSource(
+    private val httpClient: HttpClient
+) : CountriesSearchExternalSource, CountryDetailExternalSource {
+
+    override suspend fun searchCountries(query: String): List<Country> {
+        val response: RestCountriesResponse = httpClient.get("$BASE_URL/name") {
+            header("Authorization", "Bearer $API_KEY")
+            parameter("q", query)
+        }.body()
+        return response.data.objects.map { it.toDomain() }
     }
 
-    override suspend fun getAllCountries(): List<Country> {
-        return listOf(
-            Country(
-                id = "1",
-                name = "Spaghetti Bolognese",
-                description = "Italian meat sauce pasta",
-                ingredients = listOf("pasta", "meat", "tomato", "oil"),
-                instructions = "Cook and serve",
-                image = "",
-                servings = 4,
-                prepTime = 15,
-                cookTime = 30,
-                calories = 450,
-                rating = 4.7
-            ),
-            Country(
-                id = "2",
-                name = "Margherita Pizza",
-                description = "Simple tomato and cheese pizza",
-                ingredients = listOf("dough", "tomato", "cheese", "basil"),
-                instructions = "Bake at 250°C",
-                image = "",
-                servings = 2,
-                prepTime = 20,
-                cookTime = 15,
-                calories = 350,
-                rating = 4.6
-            )
-        )
+    override suspend fun getCountryById(id: String): Country? {
+        val response: RestCountriesResponse = httpClient.get("$BASE_URL/codes.alpha_3/$id") {
+            header("Authorization", "Bearer $API_KEY")
+        }.body()
+        return response.data.objects.firstOrNull()?.toDomain()
     }
 }
