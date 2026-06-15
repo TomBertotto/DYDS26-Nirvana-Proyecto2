@@ -4,8 +4,9 @@ package edu.dyds.countries.presentation.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -15,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.presentation.utils.FlagImage
@@ -27,6 +29,10 @@ fun HomeScreen(
     onCountryClick: (Country) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.search()
+    }
 
     Scaffold(
         topBar = {
@@ -42,7 +48,7 @@ fun HomeScreen(
             when {
                 uiState.isLoading -> LoadingIndicator()
                 uiState.countries.isEmpty() -> EmptyState(uiState.query)
-                else -> CountryList(uiState.countries, onCountryClick)
+                else -> GridCountryList(uiState.countries, onCountryClick)
             }
         }
     }
@@ -81,44 +87,51 @@ private fun EmptyState(query: String) {
 }
 
 @Composable
-private fun CountryList(
+private fun GridCountryList(
     countries: List<Country>,
     onCountryClick: (Country) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         items(countries) { country ->
-            CountryCard(country, onCountryClick)
+            GridCountryCard(country, onCountryClick)
         }
     }
 }
 
 @Composable
-private fun CountryCard(
+private fun GridCountryCard(
     country: Country,
     onCountryClick: (Country) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable { onCountryClick(country) }
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Column(
+            modifier = Modifier.padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             FlagImage(
                 url = country.flagPng,
                 contentDescription = country.name,
-                modifier = Modifier.width(80.dp).height(54.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.5f)
             )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(country.name, style = MaterialTheme.typography.titleMedium)
-                Text(country.region, style = MaterialTheme.typography.bodyMedium)
-                if (country.capital.isNotBlank()) {
-                    Text("Capital: ${country.capital}", style = MaterialTheme.typography.bodySmall)
-                }
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = country.name,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
