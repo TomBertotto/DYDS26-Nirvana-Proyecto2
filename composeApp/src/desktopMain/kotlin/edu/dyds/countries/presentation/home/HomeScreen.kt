@@ -28,11 +28,11 @@ fun HomeScreen(
     viewModel: HomeViewModel,
     onCountryClick: (Country) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
     LaunchedEffect(Unit) {
         viewModel.search()
     }
+
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {

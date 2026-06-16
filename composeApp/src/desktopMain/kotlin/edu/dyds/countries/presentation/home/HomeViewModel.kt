@@ -21,11 +21,19 @@ class HomeViewModel(
 
     fun search() {
         val query = _uiState.value.query
-        if (query.isBlank()) return
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase(query)
-            _uiState.value = _uiState.value.copy(countries = countries, isLoading = false)
+            _uiState.emit(
+                CountriesUiState(isLoading = true)
+            )
+
+            val countries = searchCountriesUseCase.invoke(query)
+
+            _uiState.emit(
+                CountriesUiState(
+                    isLoading = false,
+                    countries = countries
+                )
+            )
         }
     }
 }

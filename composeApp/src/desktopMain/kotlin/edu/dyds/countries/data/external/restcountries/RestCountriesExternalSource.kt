@@ -17,9 +17,8 @@ class RestCountriesExternalSource(
 ) : CountriesSearchExternalSource, CountryDetailExternalSource {
 
     override suspend fun searchCountries(query: String): List<Country> {
-        val response: RestCountriesResponse = httpClient.get("$BASE_URL/name") {
+        val response: RestCountriesResponse = httpClient.get("$BASE_URL") {
             header("Authorization", "Bearer $API_KEY")
-            parameter("q", query)
         }.body()
         return response.data.objects.map { it.toDomain() }
     }
