@@ -17,10 +17,11 @@ class RestCountriesExternalSource(
 ) : CountriesSearchExternalSource, CountryDetailExternalSource {
 
     override suspend fun searchCountries(query: String): List<Country> {
-        val response: RestCountriesResponse = httpClient.get("$BASE_URL") {
-            header("Authorization", "Bearer $API_KEY")
-        }.body()
-        return response.data.objects.map { it.toDomain() }
+        return if (query.isBlank()) {
+            getAllCountries()
+        } else {
+            getCountriesByQuery(query)
+        }
     }
 
     override suspend fun getCountryById(id: String): Country? {
@@ -28,5 +29,20 @@ class RestCountriesExternalSource(
             header("Authorization", "Bearer $API_KEY")
         }.body()
         return response.data.objects.firstOrNull()?.toDomain()
+    }
+
+    private suspend fun getCountriesByQuery(query: String): List<Country> {
+        val response: RestCountriesResponse = httpClient.get("$BASE_URL/name") {
+            header("Authorization", "Bearer $API_KEY")
+            parameter("q", query)
+        }.body()
+        return response.data.objects.map { it.toDomain() }
+    }
+
+    private suspend fun getAllCountries(): List<Country> {
+        val response: RestCountriesResponse = httpClient.get("$BASE_URL") {
+            header("Authorization", "Bearer $API_KEY")
+        }.body()
+        return response.data.objects.map { it.toDomain() }
     }
 }
