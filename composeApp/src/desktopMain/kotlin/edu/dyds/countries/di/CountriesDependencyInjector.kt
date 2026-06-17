@@ -10,6 +10,7 @@ import edu.dyds.countries.data.repository.WeatherRepositoryImpl
 import edu.dyds.countries.domain.usecase.GetCapitalWeatherUseCaseImpl
 import edu.dyds.countries.domain.usecase.GetCountryDetailsUseCaseImpl
 import edu.dyds.countries.domain.usecase.SearchCountriesUseCaseImpl
+import edu.dyds.countries.presentation.compare.CompareViewModel
 import edu.dyds.countries.presentation.detail.DetailViewModel
 import edu.dyds.countries.presentation.home.HomeViewModel
 import io.ktor.client.HttpClient
@@ -51,5 +52,10 @@ object CountriesDependencyInjector {
     @Composable
     fun getHomeViewModel(): HomeViewModel {
         return viewModel { HomeViewModel(searchCountriesUseCase) }
+    }
+
+    @Composable
+    fun getCompareViewModel(): CompareViewModel {
+        return viewModel { CompareViewModel(searchCountriesUseCase) }
     }
 }

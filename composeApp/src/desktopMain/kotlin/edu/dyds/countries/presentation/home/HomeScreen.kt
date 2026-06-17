@@ -26,7 +26,8 @@ import edu.dyds.countries.presentation.utils.LoadingIndicator
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onCountryClick: (Country) -> Unit
+    onCountryClick: (Country) -> Unit,
+    onCompareClick: () -> Unit
 ) {
     LaunchedEffect(Unit) {
         viewModel.loadInitialCountries()
@@ -36,7 +37,14 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Countries") })
+            TopAppBar(
+                title = { Text("Countries") },
+                actions = {
+                    TextButton(onClick = onCompareClick) {
+                        Text("Compare")
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
