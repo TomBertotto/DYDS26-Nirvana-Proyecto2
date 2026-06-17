@@ -19,21 +19,28 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(query = query)
     }
 
+    fun loadInitialCountries() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            val countries = searchCountriesUseCase.invoke("")
+            _uiState.value = _uiState.value.copy(isLoading = false, countries = countries)
+        }
+    }
+
     fun search() {
         val query = _uiState.value.query
+        if (query.isBlank()) {
+            loadInitialCountries()
+            return
+        }
         viewModelScope.launch {
-            _uiState.emit(
-                CountriesUiState(isLoading = true)
-            )
-
+            _uiState.value = _uiState.value.copy(isLoading = true)
             val countries = searchCountriesUseCase.invoke(query)
-
-            _uiState.emit(
-                CountriesUiState(
-                    isLoading = false,
-                    countries = countries
-                )
-            )
+            _uiState.value = if (countries.isEmpty()) {
+                _uiState.value.copy(isLoading = false)
+            } else {
+                _uiState.value.copy(isLoading = false, countries = countries)
+            }
         }
     }
 }

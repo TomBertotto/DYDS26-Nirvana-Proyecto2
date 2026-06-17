@@ -29,7 +29,7 @@ fun HomeScreen(
     onCountryClick: (Country) -> Unit
 ) {
     LaunchedEffect(Unit) {
-        viewModel.search()
+        viewModel.loadInitialCountries()
     }
 
     val uiState by viewModel.uiState.collectAsState()

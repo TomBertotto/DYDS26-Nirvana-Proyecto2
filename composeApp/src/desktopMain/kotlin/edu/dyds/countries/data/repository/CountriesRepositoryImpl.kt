@@ -13,19 +13,27 @@ class CountriesRepositoryImpl(
 ) : CountriesRepository {
 
     override suspend fun searchCountries(query: String): List<Country> {
-            val localRecipes = localDataSource.getAllCountries()
+        return if (query.isBlank()) {
+            getDefaultCountries()
+        } else {
+            runCatching { countriesSearchExternalSource.searchCountries(query) }.getOrNull() ?: emptyList()
+        }
+    }
 
-            if (localRecipes.isNotEmpty()) {
-                return localRecipes
-            }
+    private suspend fun getDefaultCountries(): List<Country> {
+        val cachedCountries = localDataSource.getAllCountries()
 
-            val remoteRecipes = runCatching { countriesSearchExternalSource.searchCountries(query) }.getOrNull() ?: emptyList()
+        if (cachedCountries.isNotEmpty()) {
+            return cachedCountries
+        }
 
-            if (remoteRecipes.isNotEmpty()) {
-                localDataSource.saveCountries(remoteRecipes)
-            }
+        val remoteCountries = runCatching { countriesSearchExternalSource.searchCountries("") }.getOrNull() ?: emptyList()
 
-            return remoteRecipes
+        if (remoteCountries.isNotEmpty()) {
+            localDataSource.saveCountries(remoteCountries)
+        }
+
+        return remoteCountries
     }
 
     override suspend fun getCountryById(id: String): Country? {
