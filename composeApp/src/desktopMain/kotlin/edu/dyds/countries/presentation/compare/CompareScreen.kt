@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import edu.dyds.countries.domain.entity.Country
@@ -41,8 +42,9 @@ fun CompareScreen(
     ) { paddingValues ->
         Row(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -76,7 +78,7 @@ private fun CompareColumn(
     modifier: Modifier
 ) {
     Column(
-        modifier = modifier.fillMaxHeight().verticalScroll(rememberScrollState())
+        modifier = modifier
     ) {
         OutlinedTextField(
             value = query,
@@ -111,7 +113,8 @@ private fun CountryComparison(country: Country) {
     FlagImage(
         url = country.flagPng,
         contentDescription = country.name,
-        modifier = Modifier.fillMaxWidth().height(120.dp)
+        modifier = Modifier.fillMaxWidth().heightIn(max = 140.dp),
+        contentScale = ContentScale.Fit
     )
 
     Spacer(modifier = Modifier.height(8.dp))

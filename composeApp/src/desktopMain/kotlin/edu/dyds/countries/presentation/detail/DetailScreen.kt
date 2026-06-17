@@ -10,6 +10,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.domain.entity.Weather
@@ -72,7 +73,8 @@ private fun CountryDetails(
             FlagImage(
                 url = country.flagPng,
                 contentDescription = country.name,
-                modifier = Modifier.fillMaxWidth().height(180.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp),
+                contentScale = ContentScale.Fit
             )
 
             Spacer(modifier = Modifier.height(16.dp))

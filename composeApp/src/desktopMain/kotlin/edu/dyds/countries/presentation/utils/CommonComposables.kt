@@ -38,7 +38,8 @@ fun NoResults() {
 fun FlagImage(
     url: String,
     contentDescription: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop
 ) {
     if (url.isBlank()) {
         Box(modifier.background(MaterialTheme.colorScheme.surfaceVariant))
@@ -47,7 +48,7 @@ fun FlagImage(
             model = url,
             contentDescription = contentDescription,
             modifier = modifier,
-            contentScale = ContentScale.Crop
+            contentScale = contentScale
         )
     }
 }
