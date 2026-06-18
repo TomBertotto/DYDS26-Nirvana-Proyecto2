@@ -21,7 +21,10 @@ data class RestCountriesRemoteCountry(
     val flag: RestCountriesFlag = RestCountriesFlag(),
     val region: String = "",
     val subregion: String = "",
-    val population: Long = 0
+    val population: Long = 0,
+    val area: RestCountriesArea = RestCountriesArea(),
+    val currencies: List<RestCountriesCurrency> = emptyList(),
+    val languages: List<RestCountriesLanguage> = emptyList()
 )
 
 @Serializable
@@ -53,4 +56,22 @@ data class RestCountriesFlag(
     val emoji: String = "",
     @SerialName("url_png") val urlPng: String = "",
     @SerialName("url_svg") val urlSvg: String = ""
+)
+
+@Serializable
+data class RestCountriesArea(
+    val kilometers: Double? = null
+)
+
+@Serializable
+data class RestCountriesCurrency(
+    val code: String = "",
+    val name: String = "",
+    val symbol: String = ""
+)
+
+@Serializable
+data class RestCountriesLanguage(
+    val name: String = "",
+    @SerialName("native_name") val nativeName: String = ""
 )

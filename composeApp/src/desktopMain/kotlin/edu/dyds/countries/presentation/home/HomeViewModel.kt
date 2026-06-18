@@ -19,6 +19,10 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(query = query)
     }
 
+    fun onCriteriaChange(criteria: SearchCriteria) {
+        _uiState.value = _uiState.value.copy(selectedCriteria = criteria)
+    }
+
     fun loadInitialCountries() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -29,10 +33,6 @@ class HomeViewModel(
 
     fun search() {
         val query = _uiState.value.query
-        if (query.isBlank()) {
-            loadInitialCountries()
-            return
-        }
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             val countries = searchCountriesUseCase.invoke(query)

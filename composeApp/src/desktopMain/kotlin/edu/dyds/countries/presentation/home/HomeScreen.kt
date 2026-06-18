@@ -3,10 +3,12 @@
 package edu.dyds.countries.presentation.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -26,7 +28,8 @@ import edu.dyds.countries.presentation.utils.LoadingIndicator
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    onCountryClick: (Country) -> Unit
+    onCountryClick: (Country) -> Unit,
+    onCompareClick: () -> Unit
 ) {
     LaunchedEffect(Unit) {
         viewModel.loadInitialCountries()
@@ -36,7 +39,14 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Countries") })
+            TopAppBar(
+                title = { Text("Countries") },
+                actions = {
+                    TextButton(onClick = onCompareClick) {
+                        Text("Compare")
+                    }
+                }
+            )
         }
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -45,6 +55,15 @@ fun HomeScreen(
                 onQueryChange = viewModel::onQueryChange,
                 onSearch = viewModel::search
             )
+
+            CriteriaFilterRow(
+                selectedCriteria = uiState.selectedCriteria,
+                onCriteriaSelected = { newCriteria ->
+                    viewModel.onCriteriaChange(newCriteria)
+                    viewModel.search()
+                }
+            )
+
             when {
                 uiState.isLoading -> LoadingIndicator()
                 uiState.countries.isEmpty() -> EmptyState(uiState.query)
@@ -86,13 +105,36 @@ private fun EmptyState(query: String) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CriteriaFilterRow(
+    selectedCriteria: SearchCriteria,
+    onCriteriaSelected: (SearchCriteria) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        SearchCriteria.entries.forEach { criteria ->
+            FilterChip(
+                selected = selectedCriteria == criteria,
+                onClick = { onCriteriaSelected(criteria) },
+                label = { Text(criteria.displayName) }
+            )
+        }
+    }
+}
+
 @Composable
 private fun GridCountryList(
     countries: List<Country>,
     onCountryClick: (Country) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Adaptive(minSize = 140.dp),
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),

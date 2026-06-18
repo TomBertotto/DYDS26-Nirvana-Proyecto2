@@ -1,8 +1,5 @@
 package edu.dyds.countries.data.external.restcountries
 
-import edu.dyds.countries.data.external.CountriesSearchExternalSource
-import edu.dyds.countries.data.external.CountryDetailExternalSource
-import edu.dyds.countries.domain.entity.Country
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -14,9 +11,8 @@ private const val API_KEY = "rc_live_87079071953942419c75bc712890f652"
 
 class RestCountriesExternalSource(
     private val httpClient: HttpClient
-) : CountriesSearchExternalSource, CountryDetailExternalSource {
-
-    override suspend fun searchCountries(query: String): List<Country> {
+){
+    suspend fun searchCountries(query: String): List<RestCountriesRemoteCountry> {
         return if (query.isBlank()) {
             getAllCountries()
         } else {
@@ -24,25 +20,46 @@ class RestCountriesExternalSource(
         }
     }
 
-    override suspend fun getCountryById(id: String): Country? {
+    suspend fun getCountryById(id: String): RestCountriesRemoteCountry? {
         val response: RestCountriesResponse = httpClient.get("$BASE_URL/codes.alpha_3/$id") {
             header("Authorization", "Bearer $API_KEY")
         }.body()
-        return response.data.objects.firstOrNull()?.toDomain()
+        return response.data.objects.firstOrNull()
     }
 
-    private suspend fun getCountriesByQuery(query: String): List<Country> {
+    private suspend fun getCountriesByQuery(query: String): List<RestCountriesRemoteCountry> {
         val response: RestCountriesResponse = httpClient.get("$BASE_URL/name") {
             header("Authorization", "Bearer $API_KEY")
             parameter("q", query)
         }.body()
-        return response.data.objects.map { it.toDomain() }
+        return response.data.objects
     }
 
-    private suspend fun getAllCountries(): List<Country> {
-        val response: RestCountriesResponse = httpClient.get("$BASE_URL") {
-            header("Authorization", "Bearer $API_KEY")
-        }.body()
-        return response.data.objects.map { it.toDomain() }
+    private suspend fun getAllCountries(): List<RestCountriesRemoteCountry> {
+        val allCountries = mutableListOf<RestCountriesRemoteCountry>()
+        var offset = 1
+        val limit = 100
+        var hasMorePages = true
+
+        while (hasMorePages) {
+            val response: RestCountriesResponse = httpClient.get("$BASE_URL") {
+                header("Authorization", "Bearer $API_KEY")
+                parameter("limit", limit)
+                parameter("offset", offset)
+            }.body()
+
+            val countriesFromPage = response.data.objects
+
+            if (countriesFromPage.isNotEmpty()) {
+                allCountries.addAll(countriesFromPage)
+                offset += limit
+            }
+
+            if (countriesFromPage.size < limit) {
+                hasMorePages = false
+            }
+        }
+
+        return allCountries
     }
 }
