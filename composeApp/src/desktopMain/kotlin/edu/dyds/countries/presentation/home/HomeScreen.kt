@@ -23,6 +23,19 @@ import androidx.compose.ui.unit.dp
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
+private val SearchBarPadding = 16.dp
+private val FilterRowHorizontalPadding = 16.dp
+private val FilterRowVerticalPadding = 8.dp
+private val FilterRowSpacing = 8.dp
+
+private val GridPadding = 8.dp
+private val GridHorizontalSpacing = 8.dp
+private val GridVerticalSpacing = 8.dp
+private val GridCellMinSize = 140.dp
+
+private val CardPadding = 8.dp
+private val CardContentSpacing = 4.dp
+private const val FlagAspectRatio = 1.5f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,7 +95,7 @@ private fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(SearchBarPadding),
         label = { Text("Search a country") },
         singleLine = true,
         trailingIcon = {
@@ -115,8 +128,8 @@ private fun CriteriaFilterRow(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = FilterRowHorizontalPadding, vertical = FilterRowVerticalPadding),
+        horizontalArrangement = Arrangement.spacedBy(FilterRowSpacing)
     ) {
         SearchCriteria.entries.forEach { criteria ->
             FilterChip(
@@ -134,11 +147,11 @@ private fun GridCountryList(
     onCountryClick: (Country) -> Unit
 ) {
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 140.dp),
+        columns = GridCells.Adaptive(minSize = GridCellMinSize),
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(GridPadding),
+        horizontalArrangement = Arrangement.spacedBy(GridHorizontalSpacing),
+        verticalArrangement = Arrangement.spacedBy(GridVerticalSpacing)
     ) {
         items(countries) { country ->
             GridCountryCard(country, onCountryClick)
@@ -157,7 +170,7 @@ private fun GridCountryCard(
             .clickable { onCountryClick(country) }
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(CardPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             FlagImage(
@@ -165,9 +178,9 @@ private fun GridCountryCard(
                 contentDescription = country.name,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1.5f)
+                    .aspectRatio(FlagAspectRatio)
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(CardContentSpacing))
             Text(
                 text = country.name,
                 style = MaterialTheme.typography.bodyMedium,

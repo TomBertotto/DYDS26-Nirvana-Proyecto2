@@ -17,6 +17,18 @@ import edu.dyds.countries.domain.entity.Weather
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
 import edu.dyds.countries.presentation.utils.NoResults
+private val ContentPadding = 16.dp
+private val LayoutHorizontalSpacing = 16.dp
+private val SectionSpacing = 16.dp
+
+private val MaxFlagHeight = 240.dp
+private val DetailRowVerticalPadding = 4.dp
+private val DetailRowLabelValueSpacing = 8.dp
+
+private val WeatherPanelWidth = 220.dp
+private val WeatherPanelPadding = 16.dp
+private val WeatherContentSpacing = 12.dp
+private val WeatherDetailsSpacing = 8.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,8 +76,8 @@ private fun CountryDetails(
     modifier: Modifier
 ) {
     Row(
-        modifier = modifier.fillMaxSize().padding(16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier.fillMaxSize().padding(ContentPadding),
+        horizontalArrangement = Arrangement.spacedBy(LayoutHorizontalSpacing)
     ) {
         Column(
             modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
@@ -73,16 +85,16 @@ private fun CountryDetails(
             FlagImage(
                 url = country.flagPng,
                 contentDescription = country.name,
-                modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp),
+                modifier = Modifier.fillMaxWidth().heightIn(max = MaxFlagHeight),
                 contentScale = ContentScale.Fit
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(SectionSpacing))
 
             Text(country.name, style = MaterialTheme.typography.headlineLarge)
             Text(country.officialName, style = MaterialTheme.typography.titleMedium)
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(SectionSpacing))
 
             DetailRow("Capital", country.capital)
             DetailRow("Region", country.region)
@@ -94,7 +106,7 @@ private fun CountryDetails(
             weather = weather,
             isLoading = isWeatherLoading,
             capital = country.capital,
-            modifier = Modifier.width(220.dp)
+            modifier = Modifier.width(WeatherPanelWidth)
         )
     }
 }
@@ -102,8 +114,8 @@ private fun CountryDetails(
 @Composable
 private fun DetailRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = DetailRowVerticalPadding),
+        horizontalArrangement = Arrangement.spacedBy(DetailRowLabelValueSpacing)
     ) {
         Text("$label:", style = MaterialTheme.typography.bodyMedium)
         Text(value.ifBlank { "—" }, style = MaterialTheme.typography.bodyMedium)
@@ -118,13 +130,13 @@ private fun WeatherPanel(
     modifier: Modifier
 ) {
     Card(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(WeatherPanelPadding)) {
             Text("Weather", style = MaterialTheme.typography.titleMedium)
             if (capital.isNotBlank()) {
                 Text(capital, style = MaterialTheme.typography.bodySmall)
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(WeatherContentSpacing))
 
             when {
                 isLoading -> CircularProgressIndicator()
@@ -133,7 +145,7 @@ private fun WeatherPanel(
                     Text("${weather.temperature}°C", style = MaterialTheme.typography.headlineMedium)
                     Text(weather.description, style = MaterialTheme.typography.bodyMedium)
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(WeatherDetailsSpacing))
 
                     Text("Feels like ${weather.apparentTemperature}°C", style = MaterialTheme.typography.bodySmall)
                     Text("Humidity ${weather.humidity}%", style = MaterialTheme.typography.bodySmall)

@@ -20,6 +20,18 @@ import androidx.compose.ui.unit.dp
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.presentation.utils.FlagImage
 
+private val ScreenContentPadding = 16.dp
+private val ColumnLayoutSpacing = 16.dp
+private val InputToContentSpacing = 16.dp
+private val SectionVerticalSpacing = 16.dp
+
+private val MaxFlagHeight = 140.dp
+private val FlagToTitleSpacing = 8.dp
+private val SectionTitleToContentSpacing = 4.dp
+private val LabeledValueVerticalPadding = 4.dp
+
+private const val EqualColumnWeight = 1f
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompareScreen(
@@ -45,8 +57,8 @@ fun CompareScreen(
                 .fillMaxWidth()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(ScreenContentPadding),
+            horizontalArrangement = Arrangement.spacedBy(ColumnLayoutSpacing)
         ) {
             CompareColumn(
                 query = uiState.firstQuery,
@@ -54,7 +66,7 @@ fun CompareScreen(
                 onSearch = viewModel::searchFirst,
                 country = uiState.firstCountry,
                 isLoading = uiState.isFirstLoading,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(EqualColumnWeight)
             )
             CompareColumn(
                 query = uiState.secondQuery,
@@ -62,7 +74,7 @@ fun CompareScreen(
                 onSearch = viewModel::searchSecond,
                 country = uiState.secondCountry,
                 isLoading = uiState.isSecondLoading,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(EqualColumnWeight)
             )
         }
     }
@@ -95,7 +107,7 @@ private fun CompareColumn(
             keyboardActions = KeyboardActions(onSearch = { onSearch() })
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(InputToContentSpacing))
 
         when {
             isLoading -> Box(Modifier.fillMaxWidth(), Alignment.Center) { CircularProgressIndicator() }
@@ -113,11 +125,11 @@ private fun CountryComparison(country: Country) {
     FlagImage(
         url = country.flagPng,
         contentDescription = country.name,
-        modifier = Modifier.fillMaxWidth().heightIn(max = 140.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(max = MaxFlagHeight),
         contentScale = ContentScale.Fit
     )
 
-    Spacer(modifier = Modifier.height(8.dp))
+    Spacer(modifier = Modifier.height(FlagToTitleSpacing))
 
     Text(country.name, style = MaterialTheme.typography.titleLarge)
     Text(country.officialName, style = MaterialTheme.typography.bodySmall)
@@ -141,15 +153,15 @@ private fun CountryComparison(country: Country) {
 
 @Composable
 private fun Section(title: String, content: @Composable () -> Unit) {
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(SectionVerticalSpacing))
     Text(title, style = MaterialTheme.typography.titleMedium)
-    Spacer(modifier = Modifier.height(4.dp))
+    Spacer(modifier = Modifier.height(SectionTitleToContentSpacing))
     content()
 }
 
 @Composable
 private fun LabeledValue(label: String, value: String) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = LabeledValueVerticalPadding)) {
         Text(label, style = MaterialTheme.typography.labelMedium)
         Text(value.ifBlank { "—" }, style = MaterialTheme.typography.bodyMedium)
     }
