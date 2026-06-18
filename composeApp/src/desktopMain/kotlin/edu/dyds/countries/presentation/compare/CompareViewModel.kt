@@ -28,7 +28,7 @@ class CompareViewModel(
         if (query.isBlank()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isFirstLoading = true)
-            val country = searchCountriesUseCase.invoke(query).firstOrNull()
+            val country = searchCountriesUseCase.invoke(query,"All").firstOrNull()
             _uiState.value = if (country == null) {
                 _uiState.value.copy(isFirstLoading = false)
             } else {
@@ -42,7 +42,7 @@ class CompareViewModel(
         if (query.isBlank()) return
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isSecondLoading = true)
-            val country = searchCountriesUseCase.invoke(query).firstOrNull()
+            val country = searchCountriesUseCase.invoke(query, "All").firstOrNull()
             _uiState.value = if (country == null) {
                 _uiState.value.copy(isSecondLoading = false)
             } else {
