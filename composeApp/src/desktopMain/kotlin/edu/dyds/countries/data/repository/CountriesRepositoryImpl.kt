@@ -12,11 +12,11 @@ class CountriesRepositoryImpl(
     private val localDataSource: CountriesLocalDataSource
 ) : CountriesRepository {
 
-    override suspend fun searchCountries(query: String): List<Country> {
+    override suspend fun searchCountries(query: String, criteria: String): List<Country>{
         val cachedCountries = localDataSource.getAllCountries()
 
         if (countryInLocal(query)) {
-            return cachedCountries
+            return filter(cachedCountries, criteria, query)
         }
 
         val remoteCountries = runCatching { countriesSearchExternalSource.searchCountries(query) }.getOrNull() ?: emptyList()
@@ -25,13 +25,24 @@ class CountriesRepositoryImpl(
             localDataSource.saveCountries(remoteCountries)
         }
 
-        return remoteCountries
+        return filter(remoteCountries, criteria, query)
     }
 
     override suspend fun getCountryById(id: String): Country? {
         val remoteCountry = runCatching { countryDetailExternalSource.getCountryById(id) }.getOrNull()
 
         return remoteCountry ?: runCatching { localDataSource.getCountryById(id) }.getOrNull()
+    }
+
+    private fun filter(countries: List<Country>, criteria: String, nameCriteria : String): List<Country> {
+        var contriesFilterList = emptyList<Country>()
+        when (criteria) {
+            "Name" -> contriesFilterList = countries.filter { it.name.contains(nameCriteria) }
+            "Region" -> contriesFilterList = countries.filter { it.region.contains(nameCriteria) }
+            "Language" -> contriesFilterList = countries.filter { it.languages.contains(nameCriteria) }
+            "All" -> contriesFilterList = countries
+        }
+        return contriesFilterList
     }
 
     private suspend fun countryInLocal(query: String): Boolean {

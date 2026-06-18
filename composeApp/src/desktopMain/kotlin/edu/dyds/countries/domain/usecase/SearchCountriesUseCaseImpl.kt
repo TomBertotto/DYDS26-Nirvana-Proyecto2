@@ -6,7 +6,7 @@ import edu.dyds.countries.domain.repository.CountriesRepository
 class SearchCountriesUseCaseImpl(
     private val repository: CountriesRepository
 ) : SearchCountriesUseCase {
-    override suspend fun invoke(query: String): List<Country> {
-        return repository.searchCountries(query)
+    override suspend fun invoke(query: String, filter : String): List<Country> {
+        return repository.searchCountries(query, filter)
     }
 }

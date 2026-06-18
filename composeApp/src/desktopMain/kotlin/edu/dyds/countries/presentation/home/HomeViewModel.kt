@@ -26,16 +26,17 @@ class HomeViewModel(
     fun loadInitialCountries() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase.invoke("")
+            val countries = searchCountriesUseCase.invoke("", _uiState.value.selectedCriteria.displayName)
             _uiState.value = _uiState.value.copy(isLoading = false, countries = countries)
         }
     }
 
     fun search() {
         val query = _uiState.value.query
+        val filter = _uiState.value.selectedCriteria.displayName
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase.invoke(query)
+            val countries = searchCountriesUseCase.invoke(query, filter)
             _uiState.value = if (countries.isEmpty()) {
                 _uiState.value.copy(isLoading = false)
             } else {

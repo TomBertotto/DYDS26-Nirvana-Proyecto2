@@ -10,8 +10,8 @@ data class CountriesUiState(
 )
 
 enum class SearchCriteria(val displayName: String) {
-    ALL("Todos"),
-    NAME("Nombre"),
-    REGION("Región"),
-    LANGUAGE("Idioma")
+    ALL("All"),
+    NAME("Name"),
+    REGION("Region"),
+    LANGUAGE("Language")
 }
