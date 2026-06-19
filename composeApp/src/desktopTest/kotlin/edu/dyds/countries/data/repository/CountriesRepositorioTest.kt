@@ -51,6 +51,38 @@ class CountriesRepositoryImplTest {
     }
 
     @Test
+    fun `si busca por region devuelve solo paises de esa region desde cache`() = runTest {
+        val cachedCountries = listOf(
+            country(name = "Argentina", region = "Americas"),
+            country(name = "France", region = "Europe"),
+            country(name = "Germany", region = "Europe")
+        )
+        coEvery { localDataSource.getAllCountries() } returns cachedCountries
+
+        val result = repository.searchCountries(query = "Europe", criteria = "Region")
+
+        val expected = listOf(cachedCountries[1], cachedCountries[2])
+        assertEquals(expected, result)
+        coVerify(exactly = 0) { countriesSearchExternalSource.searchCountries(any()) }
+    }
+
+    @Test
+    fun `si busca por lengua devuelve solo paises con esa lengua desde cache`() = runTest {
+        val cachedCountries = listOf(
+            country(name = "Argentina", languages = listOf("Spanish")),
+            country(name = "Brazil", languages = listOf("Portuguese")),
+            country(name = "Canada", languages = listOf("English", "French"))
+        )
+        coEvery { localDataSource.getAllCountries() } returns cachedCountries
+
+        val result = repository.searchCountries(query = "French", criteria = "Language")
+
+        val expected = listOf(cachedCountries[2])
+        assertEquals(expected, result)
+        coVerify(exactly = 0) { countriesSearchExternalSource.searchCountries(any()) }
+    }
+
+    @Test
     fun `si el pais no esta en local consulta remoto guarda en cache y devuelve filtrado`() = runTest {
         val remoteCountries = listOf(
             country(name = "France", region = "Europe"),

@@ -15,7 +15,7 @@ class CountriesRepositoryImpl(
     override suspend fun searchCountries(query: String, criteria: String): List<Country>{
         val cachedCountries = localDataSource.getAllCountries()
 
-        if (countryInLocal(query)) {
+        if (cachedCountries.isNotEmpty()) {
             return filter(cachedCountries, criteria, query)
         }
 
@@ -34,18 +34,14 @@ class CountriesRepositoryImpl(
         return remoteCountry ?: runCatching { localDataSource.getCountryById(id) }.getOrNull()
     }
 
-    private fun filter(countries: List<Country>, criteria: String, nameCriteria : String): List<Country> {
+    private fun filter(countries: List<Country>, criteria: String, query : String): List<Country> {
         return when (criteria) {
-            CRITERIA_NAME -> countries.filter { it.name.contains(nameCriteria, ignoreCase = true) }
-            CRITERIA_REGION -> countries.filter { it.region == nameCriteria }
-            CRITERIA_LANGUAGE -> countries.filter { it.languages == listOf(nameCriteria) }
+            CRITERIA_NAME -> countries.filter { it.name.contains(query, ignoreCase = true) }
+            CRITERIA_REGION -> countries.filter { it.region.contains(query, ignoreCase = true) }
+            CRITERIA_LANGUAGE -> countries.filter { it.languages.contains(query) }
             CRITERIA_ALL -> countries
             else -> countries
         }
-    }
-
-    private suspend fun countryInLocal(query: String): Boolean {
-        return localDataSource.getAllCountries().any { country -> country.name.contains(query, true) }
     }
 
     companion object {
