@@ -42,9 +42,9 @@ class CompareViewModelTest {
     }
 
     @Test
-    fun `cuando busca el primer pais usa el filtro all y guarda el primer resultado`() = runViewModelTest {
+    fun `cuando busca el primer pais usa el filtro name y guarda el primer resultado`() = runViewModelTest {
         val expectedCountry = country(name = "Argentina")
-        coEvery { searchCountriesUseCase("Argentina", "All") } returns listOf(expectedCountry)
+        coEvery { searchCountriesUseCase("Argentina", "Name") } returns listOf(expectedCountry)
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onFirstQueryChange("Argentina")
 
@@ -53,13 +53,13 @@ class CompareViewModelTest {
 
         assertFalse(viewModel.uiState.value.isFirstLoading)
         assertEquals(expectedCountry, viewModel.uiState.value.firstCountry)
-        coVerify(exactly = 1) { searchCountriesUseCase("Argentina", "All") }
+        coVerify(exactly = 1) { searchCountriesUseCase("Argentina", "Name") }
     }
 
     @Test
-    fun `cuando busca el segundo pais usa el filtro all y guarda el primer resultado`() = runViewModelTest {
+    fun `cuando busca el segundo pais usa el filtro name y guarda el primer resultado`() = runViewModelTest {
         val expectedCountry = country(name = "France")
-        coEvery { searchCountriesUseCase("France", "All") } returns listOf(expectedCountry)
+        coEvery { searchCountriesUseCase("France", "Name") } returns listOf(expectedCountry)
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onSecondQueryChange("France")
 
@@ -68,7 +68,7 @@ class CompareViewModelTest {
 
         assertFalse(viewModel.uiState.value.isSecondLoading)
         assertEquals(expectedCountry, viewModel.uiState.value.secondCountry)
-        coVerify(exactly = 1) { searchCountriesUseCase("France", "All") }
+        coVerify(exactly = 1) { searchCountriesUseCase("France", "Name") }
     }
 
     @Test
@@ -84,7 +84,7 @@ class CompareViewModelTest {
 
     @Test
     fun `cuando la segunda busqueda no tiene resultados no asigna pais`() = runViewModelTest {
-        coEvery { searchCountriesUseCase("Atlantis", "All") } returns emptyList()
+        coEvery { searchCountriesUseCase("Atlantis", "Name") } returns emptyList()
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onSecondQueryChange("Atlantis")
 
@@ -93,7 +93,7 @@ class CompareViewModelTest {
 
         assertFalse(viewModel.uiState.value.isSecondLoading)
         assertNull(viewModel.uiState.value.secondCountry)
-        coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", "All") }
+        coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", "Name") }
     }
 
     private fun runViewModelTest(testBody: suspend kotlinx.coroutines.test.TestScope.() -> Unit) = runTest {
