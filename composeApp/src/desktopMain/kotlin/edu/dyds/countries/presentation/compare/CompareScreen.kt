@@ -192,7 +192,7 @@ private fun CountryRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = !isLoading && error == null) { onClick() }
+            .clickable(enabled = !isLoading) { onClick() }
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
