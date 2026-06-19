@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
 import edu.dyds.countries.domain.entity.Country
+import edu.dyds.countries.domain.entity.Weather
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
 import edu.dyds.countries.presentation.utils.NoResults
@@ -59,6 +60,8 @@ fun DetailScreen(
             uiState.country == null -> NoResults()
             else -> CountryDetailsContent(
                 country = uiState.country!!,
+                weather = uiState.weather,
+                isWeatherLoading = uiState.isWeatherLoading,
                 modifier = Modifier.padding(paddingValues)
             )
         }
@@ -78,6 +81,8 @@ private object DetailDimens {
 @Composable
 private fun CountryDetailsContent(
     country: Country,
+    weather: Weather?,
+    isWeatherLoading: Boolean,
     modifier: Modifier
 ) {
     LazyColumn(
@@ -93,6 +98,11 @@ private fun CountryDetailsContent(
         item { Spacer(modifier = Modifier.height(8.dp)) }
 
         item { QuickStatsCard(country) }
+
+        if (isWeatherLoading || weather != null) {
+            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item { WeatherCard(capital = country.capital, weather = weather, isLoading = isWeatherLoading) }
+        }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -225,6 +235,67 @@ private fun StatItem(
                 fontWeight = FontWeight.SemiBold
             )
         }
+    }
+}
+
+@Composable
+private fun WeatherCard(capital: String, weather: Weather?, isLoading: Boolean) {
+    Card(
+        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+            Text(
+                if (capital.isBlank()) "Capital Weather" else "$capital Weather",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            when {
+                isLoading -> Box(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
+                }
+                weather != null -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            "${String.format("%.1f", weather.temperature)}°C",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = DetailColors.PrimaryBlue
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            weather.description,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Gray
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        WeatherMetric("Feels like", "${String.format("%.1f", weather.apparentTemperature)}°C", Modifier.weight(1f))
+                        WeatherMetric("Humidity", "${weather.humidity}%", Modifier.weight(1f))
+                        WeatherMetric("Wind", "${String.format("%.1f", weather.windSpeed)} km/h", Modifier.weight(1f))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WeatherMetric(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(modifier = modifier) {
+        Text(label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
     }
 }
 
