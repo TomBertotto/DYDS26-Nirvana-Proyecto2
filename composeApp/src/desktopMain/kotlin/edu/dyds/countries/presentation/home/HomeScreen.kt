@@ -66,7 +66,6 @@ fun HomeScreen(
         }
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            // Header manual (replaces TopAppBar)
             Text(
                 text = "Countries",
                 style = MaterialTheme.typography.headlineLarge,
@@ -162,7 +161,6 @@ private fun CriteriaFilterRow(
 ) {
     val regions = listOf("All", "Name", "Region", "Language")
     var selectedRegion by remember { mutableStateOf(regions.first()) }
-    // Sync initial visual selection with SearchCriteria when possible
     LaunchedEffect(selectedCriteria) {
         selectedRegion = when (selectedCriteria) {
             SearchCriteria.ALL -> "All"

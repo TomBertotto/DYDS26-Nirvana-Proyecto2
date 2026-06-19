@@ -41,6 +41,7 @@ fun DetailScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFFF5F5F5),
         topBar = {
             TopAppBar(
                 title = { Text("Country Details", fontWeight = FontWeight.Bold) },

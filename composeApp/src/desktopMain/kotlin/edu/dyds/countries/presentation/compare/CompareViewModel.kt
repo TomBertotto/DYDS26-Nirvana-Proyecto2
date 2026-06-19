@@ -2,6 +2,7 @@ package edu.dyds.countries.presentation.compare
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.domain.usecase.SearchCountriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,28 +27,62 @@ class CompareViewModel(
     fun searchFirst() {
         val query = _uiState.value.firstQuery
         if (query.isBlank()) return
-        viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isFirstLoading = true)
-            val country = searchCountriesUseCase.invoke(query,"All").firstOrNull()
-            _uiState.value = if (country == null) {
-                _uiState.value.copy(isFirstLoading = false)
-            } else {
-                _uiState.value.copy(firstCountry = country, isFirstLoading = false)
-            }
-        }
+        performSearch(query, SearchPosition.FIRST)
     }
 
     fun searchSecond() {
         val query = _uiState.value.secondQuery
         if (query.isBlank()) return
+        performSearch(query, SearchPosition.SECOND)
+    }
+
+    private fun performSearch(query: String, position: SearchPosition) {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isSecondLoading = true)
-            val country = searchCountriesUseCase.invoke(query, "All").firstOrNull()
-            _uiState.value = if (country == null) {
-                _uiState.value.copy(isSecondLoading = false)
-            } else {
-                _uiState.value.copy(secondCountry = country, isSecondLoading = false)
+            try {
+                updateLoadingState(position, isLoading = true)
+                val country = searchCountriesUseCase.invoke(query, DEFAULT_FILTER).firstOrNull()
+
+                if (country != null) {
+                    updateCountry(position, country)
+                } else {
+                    updateError(position, "Country not found")
+                }
+            } catch (e: Exception) {
+                updateError(position, e.message ?: "An error occurred")
+            } finally {
+                updateLoadingState(position, isLoading = false)
             }
         }
+    }
+
+    private fun updateLoadingState(position: SearchPosition, isLoading: Boolean) {
+        _uiState.value = when (position) {
+            SearchPosition.FIRST -> _uiState.value.copy(isFirstLoading = isLoading)
+            SearchPosition.SECOND -> _uiState.value.copy(isSecondLoading = isLoading)
+        }
+    }
+
+    private fun updateCountry(position: SearchPosition, country: Country) {
+        _uiState.value = when (position) {
+            SearchPosition.FIRST -> _uiState.value.copy(
+                firstCountry = country,
+                firstError = null
+            )
+            SearchPosition.SECOND -> _uiState.value.copy(
+                secondCountry = country,
+                secondError = null
+            )
+        }
+    }
+
+    private fun updateError(position: SearchPosition, error: String) {
+        _uiState.value = when (position) {
+            SearchPosition.FIRST -> _uiState.value.copy(firstError = error)
+            SearchPosition.SECOND -> _uiState.value.copy(secondError = error)
+        }
+    }
+
+    companion object {
+        private const val DEFAULT_FILTER = "All"
     }
 }

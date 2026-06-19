@@ -8,5 +8,12 @@ data class CompareUiState(
     val firstCountry: Country? = null,
     val secondCountry: Country? = null,
     val isFirstLoading: Boolean = false,
-    val isSecondLoading: Boolean = false
+    val isSecondLoading: Boolean = false,
+    val firstError: String? = null,
+    val secondError: String? = null
 )
+
+enum class SearchPosition {
+    FIRST, SECOND
+}
+
