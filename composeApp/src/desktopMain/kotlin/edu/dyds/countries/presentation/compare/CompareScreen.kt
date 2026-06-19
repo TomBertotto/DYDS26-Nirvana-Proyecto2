@@ -11,8 +11,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
@@ -74,19 +78,16 @@ fun CompareScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color(0xFF1565C0)
-                        )
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = PrimaryBlue)
                     }
                     Text(
-                        text = "Compare",
-                        style = MaterialTheme.typography.headlineLarge,
+                        text = "Compare countries",
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
+
             item {
                 CountriesCard(
                     country1 = uiState.firstCountry,
@@ -233,19 +234,20 @@ private fun CountryRow(
                 error != null -> Text(
                     text = error,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color.Red
                 )
                 country != null -> {
                     Text(
                         text = country.name,
                         style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 15.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = Color.Black
                     )
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Icon(
                             Icons.Default.LocationOn,
                             contentDescription = null,
@@ -255,7 +257,6 @@ private fun CountryRow(
                         Text(
                             text = country.capital,
                             style = MaterialTheme.typography.bodySmall,
-                            fontSize = 12.sp,
                             color = Color.Gray
                         )
                     }
@@ -263,8 +264,7 @@ private fun CountryRow(
                 else -> Text(
                     text = "Select a country",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color.Gray
                 )
             }
@@ -292,14 +292,14 @@ private fun ComparisonStatsCard(
         Column(modifier = Modifier.fillMaxWidth()) {
             val capital1 = country1?.capital.orEmpty()
             val capital2 = country2?.capital.orEmpty()
-            CompareStatRow("Capital", capital1, capital2)
+            CompareStatRow("Capital", capital1, capital2, Icons.Default.LocationOn)
 
             val area1 = country1?.areaKm2?.let { formatNumber(it) }.orEmpty()
             val area2 = country2?.areaKm2?.let { formatNumber(it) }.orEmpty()
             val areaHighlight1 = (country1?.areaKm2 ?: 0.0) > (country2?.areaKm2 ?: 0.0) && country1?.areaKm2 != null
             val areaHighlight2 = (country2?.areaKm2 ?: 0.0) > (country1?.areaKm2 ?: 0.0) && country2?.areaKm2 != null
             HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
-            CompareStatRow("Area", "$area1 km²", "$area2 km²", areaHighlight1, areaHighlight2)
+            CompareStatRow("Area", "$area1 km²", "$area2 km²", Icons.Default.Map, areaHighlight1, areaHighlight2)
 
             val pop1 = country1?.population?.toDouble() ?: 0.0
             val pop2 = country2?.population?.toDouble() ?: 0.0
@@ -308,22 +308,22 @@ private fun ComparisonStatsCard(
             val popHighlight1 = pop1 > pop2 && country1 != null
             val popHighlight2 = pop2 > pop1 && country2 != null
             HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
-            CompareStatRow("Population", pop1Formatted, pop2Formatted, popHighlight1, popHighlight2)
+            CompareStatRow("Population", pop1Formatted, pop2Formatted, Icons.Default.People, popHighlight1, popHighlight2)
 
             val region1 = country1?.region.orEmpty()
             val region2 = country2?.region.orEmpty()
             HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
-            CompareStatRow("Region", region1, region2)
+            CompareStatRow("Region", region1, region2, Icons.Default.Language)
 
             val subregion1 = country1?.subregion.orEmpty()
             val subregion2 = country2?.subregion.orEmpty()
             HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
-            CompareStatRow("Subregion", subregion1, subregion2)
+            CompareStatRow("Subregion", subregion1, subregion2, Icons.Default.Map)
 
             val langs1 = country1?.languages?.joinToString(", ").orEmpty()
             val langs2 = country2?.languages?.joinToString(", ").orEmpty()
             HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
-            CompareStatRow("Languages", langs1, langs2)
+            CompareStatRow("Languages", langs1, langs2, Icons.Default.Chat)
         }
     }
 }
@@ -333,6 +333,7 @@ private fun CompareStatRow(
     label: String,
     value1: String,
     value2: String,
+    icon: ImageVector? = null,
     highlight1: Boolean = false,
     highlight2: Boolean = false
 ) {
@@ -341,13 +342,26 @@ private fun CompareStatRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = TextGray,
-            fontSize = 10.sp,
-            letterSpacing = 1.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            if (icon != null) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = PrimaryBlue,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+            }
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+        }
         Spacer(Modifier.height(6.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             StatValueBox(value1.ifBlank { "—" }, Modifier.weight(1f), highlight1)
@@ -370,7 +384,7 @@ private fun StatValueBox(value: String, modifier: Modifier, highlighted: Boolean
                 .padding(horizontal = 12.dp, vertical = 10.dp)
                 .fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (highlighted) FontWeight.Bold else FontWeight.Medium,
+            fontWeight = if (highlighted) FontWeight.Bold else FontWeight.SemiBold,
             color = if (highlighted) PrimaryBlue else Color(0xFF212121),
             textAlign = TextAlign.Center
         )
