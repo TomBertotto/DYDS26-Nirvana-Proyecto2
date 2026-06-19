@@ -44,6 +44,7 @@ class CompareViewModel(
 
                 if (country != null) {
                     updateCountry(position, country)
+                    clearQuery(position)
                 } else {
                     updateError(position, "Country not found")
                 }
@@ -82,7 +83,14 @@ class CompareViewModel(
         }
     }
 
+    private fun clearQuery(position: SearchPosition) {
+        _uiState.value = when (position) {
+            SearchPosition.FIRST -> _uiState.value.copy(firstQuery = "")
+            SearchPosition.SECOND -> _uiState.value.copy(secondQuery = "")
+        }
+    }
+
     companion object {
-        private const val DEFAULT_FILTER = "All"
+        private const val DEFAULT_FILTER = "Name"
     }
 }

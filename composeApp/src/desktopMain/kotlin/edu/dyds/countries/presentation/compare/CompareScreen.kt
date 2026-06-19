@@ -409,7 +409,12 @@ private fun SearchDialog(
                 label = { Text("Country name") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { onSearch() })
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        onSearch()
+                        onDismiss()
+                    }
+                )
             )
         },
         confirmButton = {
