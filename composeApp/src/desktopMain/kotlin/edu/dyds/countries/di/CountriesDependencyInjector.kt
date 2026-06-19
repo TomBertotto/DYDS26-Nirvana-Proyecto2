@@ -3,8 +3,9 @@ package edu.dyds.countries.di
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.dyds.countries.data.external.openmeteo.OpenMeteoWeatherExternalSource
-import edu.dyds.countries.data.external.proxy.OpenMeteoProxy
-import edu.dyds.countries.data.external.proxy.RestCountriesProxy
+import edu.dyds.countries.data.external.openmeteo.WeatherExternalSourceImpl
+import edu.dyds.countries.data.external.restcountries.CountriesSearchExternalSourceImpl
+import edu.dyds.countries.data.external.restcountries.CountryDetailExternalSourceImpl
 import edu.dyds.countries.data.external.restcountries.RestCountriesExternalSource
 import edu.dyds.countries.data.local.CountriesLocalDataSourceImpl
 import edu.dyds.countries.data.repository.CountriesRepositoryImpl
@@ -32,19 +33,19 @@ object CountriesDependencyInjector {
     private val restCountriesExternalSource = RestCountriesExternalSource(httpClient)
     private val openMeteoWeatherExternalSource = OpenMeteoWeatherExternalSource(httpClient)
 
-    private val restCountriesProxy = RestCountriesProxy( restCountriesExternalSource)
-
-    private val openMeteoProxy = OpenMeteoProxy(openMeteoWeatherExternalSource)
+    private val countriesSearchExternalSource = CountriesSearchExternalSourceImpl(restCountriesExternalSource)
+    private val countryDetailExternalSource = CountryDetailExternalSourceImpl(restCountriesExternalSource)
+    private val weatherExternalSource = WeatherExternalSourceImpl(openMeteoWeatherExternalSource)
 
     private val localDataSource = CountriesLocalDataSourceImpl()
 
     private val countriesRepository = CountriesRepositoryImpl(
-        countriesSearchExternalSource = restCountriesProxy,
-        countryDetailExternalSource = restCountriesProxy,
+        countriesSearchExternalSource = countriesSearchExternalSource,
+        countryDetailExternalSource = countryDetailExternalSource,
         localDataSource = localDataSource
     )
 
-    private val weatherRepository = WeatherRepositoryImpl(openMeteoProxy)
+    private val weatherRepository = WeatherRepositoryImpl(weatherExternalSource)
 
     private val searchCountriesUseCase = SearchCountriesUseCaseImpl(countriesRepository)
     private val getCountryDetailsUseCase = GetCountryDetailsUseCaseImpl(countriesRepository)

@@ -1,7 +1,5 @@
-package edu.dyds.countries.data.external.proxy
+package edu.dyds.countries.data.external.openmeteo
 
-import edu.dyds.countries.data.external.openmeteo.OpenMeteoCurrent
-import edu.dyds.countries.data.external.openmeteo.OpenMeteoWeatherExternalSource
 import edu.dyds.countries.domain.entity.Weather
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -10,15 +8,15 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class OpenMeteoProxyTest {
+class WeatherExternalSourceImplTest {
 
-    private lateinit var openMeteoWeatherExternalSourceMock: OpenMeteoWeatherExternalSource
-    private lateinit var proxy: OpenMeteoProxy
+    private lateinit var openMeteoWeatherExternalSource: OpenMeteoWeatherExternalSource
+    private lateinit var externalSource: WeatherExternalSourceImpl
 
     @BeforeTest
     fun setup() {
-        openMeteoWeatherExternalSourceMock = mockk()
-        proxy = OpenMeteoProxy(openMeteoWeatherExternalSourceMock)
+        openMeteoWeatherExternalSource = mockk()
+        externalSource = WeatherExternalSourceImpl(openMeteoWeatherExternalSource)
     }
 
     @Test
@@ -31,12 +29,9 @@ class OpenMeteoProxyTest {
             coEvery { weatherCode } returns 0
             coEvery { isDay } returns 1
         }
+        coEvery { openMeteoWeatherExternalSource.getCurrentWeather(-34.60, -58.38) } returns remoteWeather
 
-        coEvery {
-            openMeteoWeatherExternalSourceMock.getCurrentWeather(-34.60, -58.38)
-        } returns remoteWeather
-
-        val result = proxy.getCurrentWeather(-34.60, -58.38)
+        val result = externalSource.getCurrentWeather(-34.60, -58.38)
 
         val expected = Weather(
             temperature = 24.5,
@@ -61,12 +56,9 @@ class OpenMeteoProxyTest {
             coEvery { weatherCode } returns 3
             coEvery { isDay } returns 0
         }
+        coEvery { openMeteoWeatherExternalSource.getCurrentWeather(51.50, -0.12) } returns remoteWeather
 
-        coEvery {
-            openMeteoWeatherExternalSourceMock.getCurrentWeather(51.50, -0.12)
-        } returns remoteWeather
-
-        val result = proxy.getCurrentWeather(51.50, -0.12)
+        val result = externalSource.getCurrentWeather(51.50, -0.12)
 
         val expected = Weather(
             temperature = 5.0,
@@ -91,12 +83,9 @@ class OpenMeteoProxyTest {
             coEvery { weatherCode } returns 999
             coEvery { isDay } returns 1
         }
+        coEvery { openMeteoWeatherExternalSource.getCurrentWeather(0.0, 0.0) } returns remoteWeather
 
-        coEvery {
-            openMeteoWeatherExternalSourceMock.getCurrentWeather(0.0, 0.0)
-        } returns remoteWeather
-
-        val result = proxy.getCurrentWeather(0.0, 0.0)
+        val result = externalSource.getCurrentWeather(0.0, 0.0)
 
         assertEquals("Unknown", result.description)
     }

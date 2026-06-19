@@ -1,21 +1,17 @@
-package edu.dyds.countries.data.external.proxy
+package edu.dyds.countries.data.external.openmeteo
 
 import edu.dyds.countries.data.external.WeatherExternalSource
-import edu.dyds.countries.data.external.openmeteo.OpenMeteoCurrent
-import edu.dyds.countries.data.external.openmeteo.OpenMeteoWeatherExternalSource
 import edu.dyds.countries.domain.entity.Weather
 
-class OpenMeteoProxy(
-    private val openMeteoProxy: OpenMeteoWeatherExternalSource
-) : WeatherExternalSource{
-    override suspend fun getCurrentWeather(
-        latitude: Double,
-        longitude: Double
-    ): Weather {
-        return openMeteoProxy.getCurrentWeather(latitude, longitude).toDomain()
+class WeatherExternalSourceImpl(
+    private val openMeteoWeatherExternalSource: OpenMeteoWeatherExternalSource
+) : WeatherExternalSource {
+
+    override suspend fun getCurrentWeather(latitude: Double, longitude: Double): Weather {
+        return openMeteoWeatherExternalSource.getCurrentWeather(latitude, longitude).toDomain()
     }
 
-    fun OpenMeteoCurrent.toDomain(): Weather = Weather(
+    private fun OpenMeteoCurrent.toDomain(): Weather = Weather(
         temperature = temperature,
         apparentTemperature = apparentTemperature,
         humidity = humidity,
