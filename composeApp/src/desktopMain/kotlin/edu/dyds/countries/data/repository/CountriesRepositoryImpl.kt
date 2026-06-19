@@ -35,17 +35,23 @@ class CountriesRepositoryImpl(
     }
 
     private fun filter(countries: List<Country>, criteria: String, nameCriteria : String): List<Country> {
-        var contriesFilterList = emptyList<Country>()
-        when (criteria) {
-            "Name" -> contriesFilterList = countries.filter { it.name.contains(nameCriteria) }
-            "Region" -> contriesFilterList = countries.filter { it.region.contains(nameCriteria) }
-            "Language" -> contriesFilterList = countries.filter { it.languages.contains(nameCriteria) }
-            "All" -> contriesFilterList = countries
+        return when (criteria) {
+            CRITERIA_NAME -> countries.filter { it.name.contains(nameCriteria, ignoreCase = true) }
+            CRITERIA_REGION -> countries.filter { it.region == nameCriteria }
+            CRITERIA_LANGUAGE -> countries.filter { it.languages == listOf(nameCriteria) }
+            CRITERIA_ALL -> countries
+            else -> countries
         }
-        return contriesFilterList
     }
 
     private suspend fun countryInLocal(query: String): Boolean {
         return localDataSource.getAllCountries().any { country -> country.name.contains(query, true) }
+    }
+
+    companion object {
+        private const val CRITERIA_ALL = "All"
+        private const val CRITERIA_NAME = "Name"
+        private const val CRITERIA_REGION = "Region"
+        private const val CRITERIA_LANGUAGE = "Language"
     }
 }

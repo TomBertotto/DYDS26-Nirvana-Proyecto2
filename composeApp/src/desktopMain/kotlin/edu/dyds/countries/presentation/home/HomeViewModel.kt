@@ -23,6 +23,12 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(selectedCriteria = criteria)
     }
 
+    fun onCriteriaChangeWithCleanup(criteria: SearchCriteria) {
+        // Si selecciona "All", limpiar la búsqueda
+        val newQuery = if (criteria == SearchCriteria.ALL) "" else _uiState.value.query
+        _uiState.value = _uiState.value.copy(selectedCriteria = criteria, query = newQuery)
+    }
+
     fun loadInitialCountries() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)

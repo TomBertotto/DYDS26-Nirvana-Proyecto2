@@ -3,32 +3,29 @@
 package edu.dyds.countries.presentation.detail
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.Alignment
 import edu.dyds.countries.domain.entity.Country
-import edu.dyds.countries.domain.entity.Weather
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
 import edu.dyds.countries.presentation.utils.NoResults
-private val ContentPadding = 16.dp
-private val LayoutHorizontalSpacing = 16.dp
-private val SectionSpacing = 16.dp
-
-private val MaxFlagHeight = 240.dp
-private val DetailRowVerticalPadding = 4.dp
-private val DetailRowLabelValueSpacing = 8.dp
-
-private val WeatherPanelWidth = 220.dp
-private val WeatherPanelPadding = 16.dp
-private val WeatherContentSpacing = 12.dp
-private val WeatherDetailsSpacing = 8.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,112 +43,265 @@ fun DetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(uiState.country?.name ?: "Country Details") },
+                title = { Text("Country Details", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = DetailColors.PrimaryBlue)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
             )
         }
     ) { paddingValues ->
         when {
             uiState.isLoading -> LoadingIndicator()
             uiState.country == null -> NoResults()
-            else -> CountryDetails(
+            else -> CountryDetailsContent(
                 country = uiState.country!!,
-                weather = uiState.weather,
-                isWeatherLoading = uiState.isWeatherLoading,
                 modifier = Modifier.padding(paddingValues)
             )
         }
     }
 }
 
+
+private object DetailColors {
+    val PrimaryBlue = Color(0xFF1565C0)
+}
+
+private object DetailDimens {
+    val CardPadding = 16.dp
+    val CornerRadius = 16.dp
+}
+
 @Composable
-private fun CountryDetails(
+private fun CountryDetailsContent(
     country: Country,
-    weather: Weather?,
-    isWeatherLoading: Boolean,
     modifier: Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxSize().padding(ContentPadding),
-        horizontalArrangement = Arrangement.spacedBy(LayoutHorizontalSpacing)
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-        Column(
-            modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())
-        ) {
-            FlagImage(
-                url = country.flagPng,
-                contentDescription = country.name,
-                modifier = Modifier.fillMaxWidth().heightIn(max = MaxFlagHeight),
-                contentScale = ContentScale.Fit
-            )
+        item { HeroImage(country) }
 
-            Spacer(modifier = Modifier.height(SectionSpacing))
-
-            Text(country.name, style = MaterialTheme.typography.headlineLarge)
-            Text(country.officialName, style = MaterialTheme.typography.titleMedium)
-
-            Spacer(modifier = Modifier.height(SectionSpacing))
-
-            DetailRow("Capital", country.capital)
-            DetailRow("Region", country.region)
-            DetailRow("Subregion", country.subregion)
-            DetailRow("Population", country.population.toString())
+        item {
+            CountryHeaderCard(country)
         }
 
-        WeatherPanel(
-            weather = weather,
-            isLoading = isWeatherLoading,
-            capital = country.capital,
-            modifier = Modifier.width(WeatherPanelWidth)
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+
+        item { QuickStatsCard(country) }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        item { GeographicInfoCard(country) }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+
+        item { LanguagesCultureCard(country) }
+
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+private fun HeroImage(country: Country) {
+    Box {
+        FlagImage(
+            url = country.flagPng,
+            contentDescription = country.name,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp),
+            contentScale = ContentScale.Crop
         )
     }
 }
 
 @Composable
-private fun DetailRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = DetailRowVerticalPadding),
-        horizontalArrangement = Arrangement.spacedBy(DetailRowLabelValueSpacing)
+private fun CountryHeaderCard(country: Country) {
+    Card(
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(y = (-24).dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Text("$label:", style = MaterialTheme.typography.bodyMedium)
-        Text(value.ifBlank { "—" }, style = MaterialTheme.typography.bodyMedium)
+        Column(modifier = Modifier.fillMaxWidth().padding(24.dp)) {
+            Text(
+                country.name,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                country.officialName,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        }
     }
 }
 
 @Composable
-private fun WeatherPanel(
-    weather: Weather?,
-    isLoading: Boolean,
-    capital: String,
-    modifier: Modifier
-) {
-    Card(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxWidth().padding(WeatherPanelPadding)) {
-            Text("Weather", style = MaterialTheme.typography.titleMedium)
-            if (capital.isNotBlank()) {
-                Text(capital, style = MaterialTheme.typography.bodySmall)
+private fun QuickStatsCard(country: Country) {
+    Card(
+        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StatItem(
+                    icon = Icons.Default.LocationOn,
+                    label = "Capital",
+                    value = country.capital,
+                    modifier = Modifier.weight(1f)
+                )
+                StatItem(
+                    icon = Icons.Default.People,
+                    label = "Population",
+                    value = formatPopulation(country.population),
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-            Spacer(modifier = Modifier.height(WeatherContentSpacing))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), thickness = 0.5.dp, color = Color.LightGray)
 
-            when {
-                isLoading -> CircularProgressIndicator()
-                weather == null -> Text("Weather unavailable", style = MaterialTheme.typography.bodyMedium)
-                else -> {
-                    Text("${weather.temperature}°C", style = MaterialTheme.typography.headlineMedium)
-                    Text(weather.description, style = MaterialTheme.typography.bodyMedium)
-
-                    Spacer(modifier = Modifier.height(WeatherDetailsSpacing))
-
-                    Text("Feels like ${weather.apparentTemperature}°C", style = MaterialTheme.typography.bodySmall)
-                    Text("Humidity ${weather.humidity}%", style = MaterialTheme.typography.bodySmall)
-                    Text("Wind ${weather.windSpeed} km/h", style = MaterialTheme.typography.bodySmall)
-                }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StatItem(
+                    icon = Icons.Default.Map,
+                    label = "Area",
+                    value = if (country.areaKm2 != null) "${String.format("%.0f", country.areaKm2)} km²" else "—",
+                    modifier = Modifier.weight(1f)
+                )
+                StatItem(
+                    icon = Icons.Default.Language,
+                    label = "Region",
+                    value = country.region,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
 }
+
+@Composable
+private fun StatItem(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = DetailColors.PrimaryBlue,
+            modifier = Modifier.size(20.dp)
+        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            Text(
+                value.ifBlank { "—" },
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+private fun GeographicInfoCard(country: Country) {
+    Card(
+        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+            Text(
+                "Geographic Information",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            IconDetailRow(icon = Icons.Default.Map, label = "Subregion", value = country.subregion)
+        }
+    }
+}
+
+@Composable
+private fun LanguagesCultureCard(country: Country) {
+    Card(
+        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+            Text(
+                "Languages & Culture",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            val languagesList = country.languages.joinToString(", ").ifBlank { "—" }
+            IconDetailRow(icon = Icons.Default.Chat, label = "Official Languages", value = languagesList)
+
+            val currenciesList = country.currencies.joinToString(", ") { it.code }.ifBlank { "—" }
+            IconDetailRow(icon = Icons.Default.AttachMoney, label = "Currency", value = currenciesList)
+        }
+    }
+}
+
+@Composable
+private fun IconDetailRow(icon: ImageVector, label: String, value: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 6.dp)
+    ) {
+        Icon(
+            icon,
+            contentDescription = null,
+            tint = DetailColors.PrimaryBlue,
+            modifier = Modifier.size(20.dp)
+        )
+        Spacer(Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+            Text(value.ifBlank { "—" }, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+        }
+    }
+}
+
+private fun formatPopulation(population: Long): String {
+    return when {
+        population >= 1_000_000 -> String.format("%.1fM", population / 1_000_000.0)
+        population >= 1_000 -> String.format("%.1fK", population / 1_000.0)
+        else -> population.toString()
+    }
+}
+
+
+
+
