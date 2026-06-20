@@ -441,15 +441,13 @@ private fun CompareBottomNavigationBar(
     val selectedColor = PrimaryBlue
     val navigationItems = listOf(
         BottomNavItem("Explore", Icons.Filled.Search, 0),
-        BottomNavItem("Favorites", Icons.Filled.Favorite, 1),
-        BottomNavItem("Versus", Icons.Filled.Star, 2),
-        BottomNavItem("Profile", Icons.Filled.Person, 3)
+        BottomNavItem("Compare", Icons.Filled.Star, 1),
     )
 
     NavigationBar(containerColor = Color.White) {
         navigationItems.forEach { item ->
             NavigationBarItem(
-                selected = item.index == 2,
+                selected = item.index == 1,
                 onClick = { onNavigationItemClick(item.index) },
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(item.label) },

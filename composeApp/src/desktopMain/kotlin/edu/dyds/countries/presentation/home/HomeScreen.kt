@@ -12,9 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -72,11 +70,6 @@ fun HomeScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
             )
-            SearchBar(
-                query = uiState.query,
-                onQueryChange = viewModel::onQueryChange,
-                onSearch = viewModel::search
-            )
 
             CriteriaFilterRow(
                 selectedCriteria = uiState.selectedCriteria,
@@ -88,6 +81,13 @@ fun HomeScreen(
                     viewModel.search()
                 }
             )
+            if (uiState.selectedCriteria != SearchCriteria.ALL) {
+                SearchBar(
+                    query = uiState.query,
+                    onQueryChange = viewModel::onQueryChange,
+                    onSearch = viewModel::search
+                )
+            }
 
             when {
                 uiState.isLoading -> LoadingIndicator()
@@ -274,9 +274,7 @@ private fun BottomNavigationBar(
     val selectedColor = Color(0xFF1565C0)
     val navigationItems = listOf(
         BottomNavItem("Explore", Icons.Filled.Search, 0),
-        BottomNavItem("Favorites", Icons.Filled.Favorite, 1),
-        BottomNavItem("Versus", Icons.Filled.Star, 2),
-        BottomNavItem("Profile", Icons.Filled.Person, 3)
+        BottomNavItem("Compare", Icons.Filled.Star, 1)
     )
 
     NavigationBar(containerColor = Color.White) {
@@ -285,7 +283,7 @@ private fun BottomNavigationBar(
                 selected = selectedIndex == item.index,
                 onClick = {
                     onIndexChanged(item.index)
-                    if (item.index == 2) onCompareClick()
+                    if (item.index == 1) onCompareClick()
                 },
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(item.label) },
