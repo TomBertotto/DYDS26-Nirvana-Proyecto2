@@ -38,7 +38,9 @@ class CountriesRepositoryImpl(
         return when (criteria) {
             CRITERIA_NAME -> countries.filter { it.name.contains(query, ignoreCase = true) }
             CRITERIA_REGION -> countries.filter { it.region.contains(query, ignoreCase = true) }
-            CRITERIA_LANGUAGE -> countries.filter { it.languages.contains(query) }
+            CRITERIA_LANGUAGE -> countries.filter { country ->
+                country.languages.any { it.contains(query, ignoreCase = true) }
+            }
             CRITERIA_ALL -> countries
             else -> countries
         }
