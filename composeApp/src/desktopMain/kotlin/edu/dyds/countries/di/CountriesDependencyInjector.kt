@@ -8,6 +8,7 @@ import edu.dyds.countries.data.external.restcountries.CountriesListExternalSourc
 import edu.dyds.countries.data.external.restcountries.CountryDetailExternalSourceImpl
 import edu.dyds.countries.data.external.restcountries.RestCountriesExternalSource
 import edu.dyds.countries.data.local.CountriesLocalDataSourceImpl
+import edu.dyds.countries.data.local.createCountriesDataStore
 import edu.dyds.countries.data.repository.CountriesRepositoryImpl
 import edu.dyds.countries.data.repository.WeatherRepositoryImpl
 import edu.dyds.countries.domain.usecase.GetCapitalWeatherUseCaseImpl
@@ -37,7 +38,7 @@ object CountriesDependencyInjector {
     private val countryDetailExternalSource = CountryDetailExternalSourceImpl(restCountriesExternalSource)
     private val weatherExternalSource = WeatherExternalSourceImpl(openMeteoWeatherExternalSource)
 
-    private val localDataSource = CountriesLocalDataSourceImpl()
+    private val localDataSource = CountriesLocalDataSourceImpl(createCountriesDataStore())
 
     private val countriesRepository = CountriesRepositoryImpl(
         countriesListExternalSource = countriesListExternalSource,

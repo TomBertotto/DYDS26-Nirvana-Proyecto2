@@ -39,6 +39,8 @@ kotlin {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.androidx.datastore.preferences.core)
+            implementation(libs.okio)
             runtimeOnly(libs.slf4j.simple)
         }
         desktopTest.dependencies {
