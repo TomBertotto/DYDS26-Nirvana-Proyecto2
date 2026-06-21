@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.draw.clip
@@ -30,8 +28,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.sp
 import edu.dyds.countries.domain.entity.Country
+import edu.dyds.countries.domain.entity.SearchCriteria
+import edu.dyds.countries.presentation.components.AppColors
+import edu.dyds.countries.presentation.components.COMPARE_NAV_INDEX
+import edu.dyds.countries.presentation.components.CountriesBottomNavigationBar
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
+
 private val SearchBarPadding = 16.dp
 private val FilterRowHorizontalPadding = 16.dp
 private val FilterRowVerticalPadding = 8.dp
@@ -51,16 +54,16 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = AppColors.ScreenBackground,
         bottomBar = {
             var selectedIndex by remember { mutableStateOf(0) }
-                BottomNavigationBar(
-                    selectedIndex = selectedIndex,
-                    onIndexChanged = { newIndex ->
-                        selectedIndex = newIndex
-                    },
-                    onCompareClick = onCompareClick
-                )
+            CountriesBottomNavigationBar(
+                selectedIndex = selectedIndex,
+                onItemSelected = { index ->
+                    selectedIndex = index
+                    if (index == COMPARE_NAV_INDEX) onCompareClick()
+                }
+            )
         }
     ) { paddingValues ->
         Column(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -70,24 +73,19 @@ fun HomeScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
             )
+            SearchBar(
+                query = uiState.query,
+                onQueryChange = viewModel::onQueryChange,
+                onSearch = viewModel::search
+            )
 
             CriteriaFilterRow(
                 selectedCriteria = uiState.selectedCriteria,
-                onCriteriaSelected = { newCriteria ->
-                    viewModel.onCriteriaChange(newCriteria)
-                    if (newCriteria == SearchCriteria.ALL) {
-                        viewModel.onQueryChange("")
-                    }
+                onCriteriaSelected = { criteria ->
+                    viewModel.onCriteriaChange(criteria)
                     viewModel.search()
                 }
             )
-            if (uiState.selectedCriteria != SearchCriteria.ALL) {
-                SearchBar(
-                    query = uiState.query,
-                    onQueryChange = viewModel::onQueryChange,
-                    onSearch = viewModel::search
-                )
-            }
 
             when {
                 uiState.isLoading -> LoadingIndicator()
@@ -153,23 +151,11 @@ private fun EmptyState(query: String) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CriteriaFilterRow(
     selectedCriteria: SearchCriteria,
     onCriteriaSelected: (SearchCriteria) -> Unit
 ) {
-    val regions = listOf("All", "Name", "Region", "Language")
-    var selectedRegion by remember { mutableStateOf(regions.first()) }
-    LaunchedEffect(selectedCriteria) {
-        selectedRegion = when (selectedCriteria) {
-            SearchCriteria.ALL -> "All"
-            SearchCriteria.NAME -> "Name"
-            SearchCriteria.REGION -> "Region"
-            SearchCriteria.LANGUAGE -> "Language"
-        }
-    }
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -177,36 +163,24 @@ private fun CriteriaFilterRow(
             .padding(horizontal = FilterRowHorizontalPadding, vertical = FilterRowVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(FilterRowSpacing)
     ) {
-        regions.forEach { region ->
-            val isSelected = selectedRegion == region
+        SearchCriteria.entries.forEach { criteria ->
+            val isSelected = selectedCriteria == criteria
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = if (isSelected) Color(0xFF1565C0) else Color.White,
+                color = if (isSelected) AppColors.PrimaryBlue else Color.White,
                 tonalElevation = 0.dp,
                 shadowElevation = 0.dp,
                 modifier = Modifier
                     .defaultMinSize(minHeight = 36.dp)
-                    .padding(end = 0.dp)
-                    .clickable {
-                        selectedRegion = region
-                        val criteria = when (region) {
-                            "All" -> SearchCriteria.ALL
-                            "Name" -> SearchCriteria.NAME
-                            "Region" -> SearchCriteria.REGION
-                            "Language" -> SearchCriteria.LANGUAGE
-                            else -> SearchCriteria.ALL
-                        }
-                        onCriteriaSelected(criteria)
-                    }
+                    .clickable { onCriteriaSelected(criteria) }
             ) {
                 Box(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        text = region,
+                        text = criteria.label,
                         color = if (isSelected) Color.White else Color.DarkGray
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(8.dp))
         }
     }
 }
@@ -247,13 +221,13 @@ private fun GridCountryList(
                         Text(text = country.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Filled.Place, contentDescription = "Location", tint = Color(0xFF1565C0), modifier = Modifier.size(14.dp))
+                            Icon(Icons.Filled.Place, contentDescription = "Location", tint = AppColors.PrimaryBlue, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(text = country.capital, color = Color.Gray, fontSize = 13.sp)
                         }
                         Spacer(modifier = Modifier.height(6.dp))
-                        Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFE3F2FD)) {
-                            Text(text = country.region, color = Color(0xFF1565C0), fontSize = 11.sp, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                        Surface(shape = RoundedCornerShape(8.dp), color = AppColors.LightBlueChip) {
+                            Text(text = country.region, color = AppColors.PrimaryBlue, fontSize = 11.sp, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
                         }
                     }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -263,39 +237,3 @@ private fun GridCountryList(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun BottomNavigationBar(
-    selectedIndex: Int,
-    onIndexChanged: (Int) -> Unit,
-    onCompareClick: () -> Unit
-) {
-    val selectedColor = Color(0xFF1565C0)
-    val navigationItems = listOf(
-        BottomNavItem("Explore", Icons.Filled.Search, 0),
-        BottomNavItem("Compare", Icons.Filled.Star, 1)
-    )
-
-    NavigationBar(containerColor = Color.White) {
-        navigationItems.forEach { item ->
-            NavigationBarItem(
-                selected = selectedIndex == item.index,
-                onClick = {
-                    onIndexChanged(item.index)
-                    if (item.index == 1) onCompareClick()
-                },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = selectedColor,
-                    unselectedIconColor = Color.Gray,
-                    selectedTextColor = selectedColor,
-                    unselectedTextColor = Color.Gray
-                )
-            )
-        }
-    }
-}
-
-private data class BottomNavItem(val label: String, val icon: ImageVector, val index: Int)

@@ -2,6 +2,7 @@ package edu.dyds.countries.domain.usecase
 
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.domain.entity.Currency
+import edu.dyds.countries.domain.entity.SearchCriteria
 import edu.dyds.countries.domain.repository.CountriesRepository
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -23,68 +24,68 @@ class SearchCountriesUseCaseImplTest {
     }
 
     @Test
-    fun `si busca todos delega el filtro all y devuelve todos los paises`() = runTest {
-        val expectedCountries = listOf(
+    fun `con criterio all devuelve todos los paises`() = runTest {
+        val countries = listOf(
             country(name = "Argentina", region = "Americas"),
             country(name = "France", region = "Europe")
         )
-        coEvery { repository.searchCountries(query = "", criteria = "All") } returns expectedCountries
+        coEvery { repository.getAllCountries() } returns countries
 
-        val result = useCase(query = "", filter = "All")
+        val result = useCase(query = "", criteria = SearchCriteria.ALL)
 
-        assertEquals(expectedCountries, result)
-        coVerify(exactly = 1) { repository.searchCountries(query = "", criteria = "All") }
+        assertEquals(countries, result)
+        coVerify(exactly = 1) { repository.getAllCountries() }
     }
 
     @Test
-    fun `si busca por nombre delega el filtro y devuelve los paises encontrados`() = runTest {
-        val expectedCountries = listOf(
-            country(name = "Argentina", region = "Americas")
+    fun `con criterio name filtra por nombre`() = runTest {
+        val countries = listOf(
+            country(name = "Argentina", region = "Americas"),
+            country(name = "France", region = "Europe")
         )
-        coEvery { repository.searchCountries(query = "Argentina", criteria = "Name") } returns expectedCountries
+        coEvery { repository.getAllCountries() } returns countries
 
-        val result = useCase(query = "Argentina", filter = "Name")
+        val result = useCase(query = "arg", criteria = SearchCriteria.NAME)
 
-        assertEquals(expectedCountries, result)
-        coVerify(exactly = 1) { repository.searchCountries(query = "Argentina", criteria = "Name") }
+        assertEquals(listOf(countries[0]), result)
     }
 
     @Test
-    fun `si busca por region delega el filtro y devuelve los paises encontrados`() = runTest {
-        val expectedCountries = listOf(
+    fun `con criterio region filtra por region`() = runTest {
+        val countries = listOf(
+            country(name = "Argentina", region = "Americas"),
             country(name = "France", region = "Europe"),
             country(name = "Germany", region = "Europe")
         )
-        coEvery { repository.searchCountries(query = "Europe", criteria = "Region") } returns expectedCountries
+        coEvery { repository.getAllCountries() } returns countries
 
-        val result = useCase(query = "Europe", filter = "Region")
+        val result = useCase(query = "Europe", criteria = SearchCriteria.REGION)
 
-        assertEquals(expectedCountries, result)
-        coVerify(exactly = 1) { repository.searchCountries(query = "Europe", criteria = "Region") }
+        assertEquals(listOf(countries[1], countries[2]), result)
     }
 
     @Test
-    fun `si busca por lengua delega el filtro y devuelve los paises encontrados`() = runTest {
-        val expectedCountries = listOf(
+    fun `con criterio language filtra por lengua`() = runTest {
+        val countries = listOf(
             country(name = "Canada", languages = listOf("English", "French")),
-            country(name = "France", languages = listOf("French"))
+            country(name = "France", languages = listOf("French")),
+            country(name = "Brazil", languages = listOf("Portuguese"))
         )
-        coEvery { repository.searchCountries(query = "French", criteria = "Language") } returns expectedCountries
+        coEvery { repository.getAllCountries() } returns countries
 
-        val result = useCase(query = "French", filter = "Language")
+        val result = useCase(query = "french", criteria = SearchCriteria.LANGUAGE)
 
-        assertEquals(expectedCountries, result)
-        coVerify(exactly = 1) { repository.searchCountries(query = "French", criteria = "Language") }
+        assertEquals(listOf(countries[0], countries[1]), result)
     }
 
     @Test
-    fun `si el repositorio devuelve lista vacia retorna lista vacia`() = runTest {
-        coEvery { repository.searchCountries(query = "Atlantis", criteria = "Name") } returns emptyList()
+    fun `si el repositorio no devuelve paises retorna lista vacia`() = runTest {
+        coEvery { repository.getAllCountries() } returns emptyList()
 
-        val result = useCase(query = "Atlantis", filter = "Name")
+        val result = useCase(query = "Argentina", criteria = SearchCriteria.NAME)
 
         assertEquals(emptyList(), result)
-        coVerify(exactly = 1) { repository.searchCountries(query = "Atlantis", criteria = "Name") }
+        coVerify(exactly = 1) { repository.getAllCountries() }
     }
 
     private fun country(
@@ -95,15 +96,13 @@ class SearchCountriesUseCaseImplTest {
     ): Country = Country(
         id = id,
         name = name,
-        officialName = "Argentine Republic",
+        officialName = "$name Official",
         capital = "Buenos Aires",
         region = region,
         subregion = "South America",
         population = 46000000,
         areaKm2 = 2780400.0,
-        currencies = listOf(
-            Currency(code = "ARS", name = "Argentine Peso", symbol = "$")
-        ),
+        currencies = listOf(Currency(code = "ARS", name = "Argentine Peso", symbol = "$")),
         languages = languages,
         flagPng = "https://flagcdn.com/w320/ar.png",
         flagEmoji = "🇦🇷",

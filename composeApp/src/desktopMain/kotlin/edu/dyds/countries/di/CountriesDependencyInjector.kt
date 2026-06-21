@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.dyds.countries.data.external.openmeteo.OpenMeteoWeatherExternalSource
 import edu.dyds.countries.data.external.openmeteo.WeatherExternalSourceImpl
-import edu.dyds.countries.data.external.restcountries.CountriesSearchExternalSourceImpl
+import edu.dyds.countries.data.external.restcountries.CountriesListExternalSourceImpl
 import edu.dyds.countries.data.external.restcountries.CountryDetailExternalSourceImpl
 import edu.dyds.countries.data.external.restcountries.RestCountriesExternalSource
 import edu.dyds.countries.data.local.CountriesLocalDataSourceImpl
@@ -33,14 +33,14 @@ object CountriesDependencyInjector {
     private val restCountriesExternalSource = RestCountriesExternalSource(httpClient)
     private val openMeteoWeatherExternalSource = OpenMeteoWeatherExternalSource(httpClient)
 
-    private val countriesSearchExternalSource = CountriesSearchExternalSourceImpl(restCountriesExternalSource)
+    private val countriesListExternalSource = CountriesListExternalSourceImpl(restCountriesExternalSource)
     private val countryDetailExternalSource = CountryDetailExternalSourceImpl(restCountriesExternalSource)
     private val weatherExternalSource = WeatherExternalSourceImpl(openMeteoWeatherExternalSource)
 
     private val localDataSource = CountriesLocalDataSourceImpl()
 
     private val countriesRepository = CountriesRepositoryImpl(
-        countriesSearchExternalSource = countriesSearchExternalSource,
+        countriesListExternalSource = countriesListExternalSource,
         countryDetailExternalSource = countryDetailExternalSource,
         localDataSource = localDataSource
     )

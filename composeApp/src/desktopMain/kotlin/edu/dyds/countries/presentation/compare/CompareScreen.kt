@@ -17,10 +17,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -35,21 +31,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import edu.dyds.countries.domain.entity.Country
+import edu.dyds.countries.presentation.components.AppColors
+import edu.dyds.countries.presentation.components.COMPARE_NAV_INDEX
+import edu.dyds.countries.presentation.components.CountriesBottomNavigationBar
 import edu.dyds.countries.presentation.utils.FlagImage
 
 private val CardPadding = 16.dp
 private val CardSpacing = 12.dp
-private val PrimaryBlue = Color(0xFF1565C0)
-private val LightGray = Color(0xFFF5F5F5)
+private val PrimaryBlue = AppColors.PrimaryBlue
+private val LightGray = AppColors.ScreenBackground
 private val DividerGray = Color(0xFFE0E0E0)
-private val TextGray = Color(0xFF9E9E9E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompareScreen(
     viewModel: CompareViewModel,
-    onBack: () -> Unit,
-    onCompareClick: () -> Unit
+    onBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showFirstSearchDialog by remember { mutableStateOf(false) }
@@ -58,9 +55,10 @@ fun CompareScreen(
     Scaffold(
         containerColor = LightGray,
         bottomBar = {
-            CompareBottomNavigationBar(
-                onNavigationItemClick = { index ->
-                    if (index != 2) onBack()
+            CountriesBottomNavigationBar(
+                selectedIndex = COMPARE_NAV_INDEX,
+                onItemSelected = { index ->
+                    if (index != COMPARE_NAV_INDEX) onBack()
                 }
             )
         }
@@ -376,7 +374,7 @@ private fun StatValueBox(value: String, modifier: Modifier, highlighted: Boolean
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
-        color = if (highlighted) Color(0xFFE3F2FD) else LightGray
+        color = if (highlighted) AppColors.LightBlueChip else LightGray
     ) {
         Text(
             text = value,
@@ -432,37 +430,6 @@ private fun SearchDialog(
         }
     )
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CompareBottomNavigationBar(
-    onNavigationItemClick: (Int) -> Unit
-) {
-    val selectedColor = PrimaryBlue
-    val navigationItems = listOf(
-        BottomNavItem("Explore", Icons.Filled.Search, 0),
-        BottomNavItem("Compare", Icons.Filled.Star, 1),
-    )
-
-    NavigationBar(containerColor = Color.White) {
-        navigationItems.forEach { item ->
-            NavigationBarItem(
-                selected = item.index == 1,
-                onClick = { onNavigationItemClick(item.index) },
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = selectedColor,
-                    unselectedIconColor = Color.Gray,
-                    selectedTextColor = selectedColor,
-                    unselectedTextColor = Color.Gray
-                )
-            )
-        }
-    }
-}
-
-private data class BottomNavItem(val label: String, val icon: ImageVector, val index: Int)
 
 private fun formatPopulation(value: Double): String = when {
     value >= 1_000_000 -> String.format("%.1fM", value / 1_000_000)

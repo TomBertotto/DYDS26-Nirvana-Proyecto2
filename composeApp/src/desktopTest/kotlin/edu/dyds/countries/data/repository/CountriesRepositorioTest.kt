@@ -1,6 +1,6 @@
 package edu.dyds.countries.data.repository
 
-import edu.dyds.countries.data.external.CountriesSearchExternalSource
+import edu.dyds.countries.data.external.CountriesListExternalSource
 import edu.dyds.countries.data.external.CountryDetailExternalSource
 import edu.dyds.countries.data.local.CountriesLocalDataSource
 import edu.dyds.countries.domain.entity.Country
@@ -17,101 +17,58 @@ import kotlin.test.assertNull
 
 class CountriesRepositoryImplTest {
 
-    private lateinit var countriesSearchExternalSource: CountriesSearchExternalSource
+    private lateinit var countriesListExternalSource: CountriesListExternalSource
     private lateinit var countryDetailExternalSource: CountryDetailExternalSource
     private lateinit var localDataSource: CountriesLocalDataSource
     private lateinit var repository: CountriesRepositoryImpl
 
     @BeforeTest
     fun setup() {
-        countriesSearchExternalSource = mockk()
+        countriesListExternalSource = mockk()
         countryDetailExternalSource = mockk()
         localDataSource = mockk()
         repository = CountriesRepositoryImpl(
-            countriesSearchExternalSource = countriesSearchExternalSource,
+            countriesListExternalSource = countriesListExternalSource,
             countryDetailExternalSource = countryDetailExternalSource,
             localDataSource = localDataSource
         )
     }
 
-
     @Test
-    fun `si el pais esta en local devuelve cache filtrada y no consulta remoto`() = runTest {
-        val cachedCountries = listOf(
-            country(name = "Argentina", region = "Americas"),
-            country(name = "Brazil", region = "Americas")
-        )
+    fun `si hay cache devuelve la cache y no consulta remoto`() = runTest {
+        val cachedCountries = listOf(country(name = "Argentina"), country(name = "Brazil"))
         coEvery { localDataSource.getAllCountries() } returns cachedCountries
 
-        val result = repository.searchCountries(query = "Argentina", criteria = "Name")
+        val result = repository.getAllCountries()
 
-        val expected = listOf(cachedCountries[0])
-        assertEquals(expected, result)
-        coVerify(exactly = 0) { countriesSearchExternalSource.searchCountries(any()) }
+        assertEquals(cachedCountries, result)
+        coVerify(exactly = 0) { countriesListExternalSource.getAllCountries() }
     }
 
     @Test
-    fun `si busca por region devuelve solo paises de esa region desde cache`() = runTest {
-        val cachedCountries = listOf(
-            country(name = "Argentina", region = "Americas"),
-            country(name = "France", region = "Europe"),
-            country(name = "Germany", region = "Europe")
-        )
-        coEvery { localDataSource.getAllCountries() } returns cachedCountries
-
-        val result = repository.searchCountries(query = "Europe", criteria = "Region")
-
-        val expected = listOf(cachedCountries[1], cachedCountries[2])
-        assertEquals(expected, result)
-        coVerify(exactly = 0) { countriesSearchExternalSource.searchCountries(any()) }
-    }
-
-    @Test
-    fun `si busca por lengua devuelve solo paises con esa lengua desde cache`() = runTest {
-        val cachedCountries = listOf(
-            country(name = "Argentina", languages = listOf("Spanish")),
-            country(name = "Brazil", languages = listOf("Portuguese")),
-            country(name = "Canada", languages = listOf("English", "French"))
-        )
-        coEvery { localDataSource.getAllCountries() } returns cachedCountries
-
-        val result = repository.searchCountries(query = "French", criteria = "Language")
-
-        val expected = listOf(cachedCountries[2])
-        assertEquals(expected, result)
-        coVerify(exactly = 0) { countriesSearchExternalSource.searchCountries(any()) }
-    }
-
-    @Test
-    fun `si el pais no esta en local consulta remoto guarda en cache y devuelve filtrado`() = runTest {
-        val remoteCountries = listOf(
-            country(name = "France", region = "Europe"),
-            country(name = "Germany", region = "Europe")
-        )
+    fun `si no hay cache consulta remoto guarda en cache y devuelve`() = runTest {
+        val remoteCountries = listOf(country(name = "France"), country(name = "Germany"))
         coEvery { localDataSource.getAllCountries() } returns emptyList()
-        coEvery { countriesSearchExternalSource.searchCountries("France") } returns remoteCountries
+        coEvery { countriesListExternalSource.getAllCountries() } returns remoteCountries
         coEvery { localDataSource.saveCountries(remoteCountries) } returns Unit
 
-        val result = repository.searchCountries(query = "France", criteria = "Name")
+        val result = repository.getAllCountries()
 
-        val expected = listOf(remoteCountries[0])
-        assertEquals(expected, result)
-        coVerify(exactly = 1) { countriesSearchExternalSource.searchCountries("France") }
+        assertEquals(remoteCountries, result)
+        coVerify(exactly = 1) { countriesListExternalSource.getAllCountries() }
         coVerify(exactly = 1) { localDataSource.saveCountries(remoteCountries) }
     }
 
     @Test
-    fun `si el pais no esta en local y remoto falla devuelve lista vacia sin guardar en cache`() = runTest {
+    fun `si no hay cache y remoto falla devuelve lista vacia sin guardar`() = runTest {
         coEvery { localDataSource.getAllCountries() } returns emptyList()
-        coEvery { countriesSearchExternalSource.searchCountries("Japan") } throws RuntimeException("Network error")
+        coEvery { countriesListExternalSource.getAllCountries() } throws RuntimeException("Network error")
 
-        val result = repository.searchCountries(query = "Japan", criteria = "Name")
+        val result = repository.getAllCountries()
 
         assertEquals(emptyList(), result)
-        coVerify(exactly = 1) { countriesSearchExternalSource.searchCountries("Japan") }
         coVerify(exactly = 0) { localDataSource.saveCountries(any()) }
     }
-
 
     @Test
     fun `si detalle remoto devuelve un pais lo retorna sin consultar cache`() = runTest {

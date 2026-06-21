@@ -58,8 +58,7 @@ private fun NavGraphBuilder.compareDestination(navController: NavHostController,
     composable(COMPARE) {
         CompareScreen(
             viewModel = compareViewModel,
-            onBack = { navController.popBackStack() },
-            onCompareClick = { navController.navigate(COMPARE) }
+            onBack = { navController.popBackStack() }
         )
     }
 }

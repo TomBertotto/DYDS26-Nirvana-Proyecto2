@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.domain.entity.Weather
+import edu.dyds.countries.presentation.components.AppColors
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
 import edu.dyds.countries.presentation.utils.NoResults
@@ -42,7 +43,7 @@ fun DetailScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF5F5F5),
+        containerColor = AppColors.ScreenBackground,
         topBar = {
             TopAppBar(
                 title = { Text("Country Details", fontWeight = FontWeight.Bold) },
@@ -70,7 +71,7 @@ fun DetailScreen(
 
 
 private object DetailColors {
-    val PrimaryBlue = Color(0xFF1565C0)
+    val PrimaryBlue = AppColors.PrimaryBlue
 }
 
 private object DetailDimens {

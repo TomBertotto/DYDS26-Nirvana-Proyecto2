@@ -2,6 +2,7 @@ package edu.dyds.countries.presentation.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.dyds.countries.domain.entity.SearchCriteria
 import edu.dyds.countries.domain.usecase.SearchCountriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,29 +21,24 @@ class HomeViewModel(
     }
 
     fun onCriteriaChange(criteria: SearchCriteria) {
-        _uiState.value = _uiState.value.copy(selectedCriteria = criteria)
-    }
-
-    fun onCriteriaChangeWithCleanup(criteria: SearchCriteria) {
-        // Si selecciona "All", limpiar la búsqueda
-        val newQuery = if (criteria == SearchCriteria.ALL) "" else _uiState.value.query
-        _uiState.value = _uiState.value.copy(selectedCriteria = criteria, query = newQuery)
+        val query = if (criteria == SearchCriteria.ALL) "" else _uiState.value.query
+        _uiState.value = _uiState.value.copy(selectedCriteria = criteria, query = query)
     }
 
     fun loadInitialCountries() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase.invoke("", _uiState.value.selectedCriteria.displayName)
+            val countries = searchCountriesUseCase(_uiState.value.query, _uiState.value.selectedCriteria)
             _uiState.value = _uiState.value.copy(isLoading = false, countries = countries)
         }
     }
 
     fun search() {
         val query = _uiState.value.query
-        val filter = _uiState.value.selectedCriteria.displayName
+        val criteria = _uiState.value.selectedCriteria
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase.invoke(query, filter)
+            val countries = searchCountriesUseCase(query, criteria)
             _uiState.value = if (countries.isEmpty()) {
                 _uiState.value.copy(isLoading = false)
             } else {

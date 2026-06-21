@@ -3,6 +3,7 @@ package edu.dyds.countries.presentation.compare
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.dyds.countries.domain.entity.Country
+import edu.dyds.countries.domain.entity.SearchCriteria
 import edu.dyds.countries.domain.usecase.SearchCountriesUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +41,7 @@ class CompareViewModel(
         viewModelScope.launch {
             try {
                 updateLoadingState(position, isLoading = true)
-                val country = searchCountriesUseCase.invoke(query, DEFAULT_FILTER).firstOrNull()
+                val country = searchCountriesUseCase(query, SEARCH_CRITERIA).firstOrNull()
 
                 if (country != null) {
                     updateCountry(position, country)
@@ -91,6 +92,6 @@ class CompareViewModel(
     }
 
     companion object {
-        private const val DEFAULT_FILTER = "Name"
+        private val SEARCH_CRITERIA = SearchCriteria.NAME
     }
 }

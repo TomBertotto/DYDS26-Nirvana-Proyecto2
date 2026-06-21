@@ -35,7 +35,6 @@ data class RestCountriesNames(
 
 @Serializable
 data class RestCountriesCodes(
-    @SerialName("alpha_2") val alpha2: String = "",
     @SerialName("alpha_3") val alpha3: String = ""
 )
 
@@ -54,8 +53,7 @@ data class RestCountriesCoordinates(
 @Serializable
 data class RestCountriesFlag(
     val emoji: String = "",
-    @SerialName("url_png") val urlPng: String = "",
-    @SerialName("url_svg") val urlSvg: String = ""
+    @SerialName("url_png") val urlPng: String = ""
 )
 
 @Serializable
@@ -72,6 +70,5 @@ data class RestCountriesCurrency(
 
 @Serializable
 data class RestCountriesLanguage(
-    val name: String = "",
-    @SerialName("native_name") val nativeName: String = ""
+    val name: String = ""
 )

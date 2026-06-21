@@ -2,6 +2,7 @@ package edu.dyds.countries.presentation.home
 
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.domain.entity.Currency
+import edu.dyds.countries.domain.entity.SearchCriteria
 import edu.dyds.countries.domain.usecase.SearchCountriesUseCase
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -45,7 +46,7 @@ class HomeViewModelTest {
         val viewModel = HomeViewModel(searchCountriesUseCase)
         viewModel.onQueryChange("Europe")
 
-        viewModel.onCriteriaChangeWithCleanup(SearchCriteria.ALL)
+        viewModel.onCriteriaChange(SearchCriteria.ALL)
 
         assertEquals("", viewModel.uiState.value.query)
         assertEquals(SearchCriteria.ALL, viewModel.uiState.value.selectedCriteria)
@@ -54,7 +55,7 @@ class HomeViewModelTest {
     @Test
     fun `cuando carga paises iniciales busca con query vacia y criterio all`() = runViewModelTest {
         val expectedCountries = listOf(country(name = "Argentina"), country(name = "France"))
-        coEvery { searchCountriesUseCase("", "All") } returns expectedCountries
+        coEvery { searchCountriesUseCase("", SearchCriteria.ALL) } returns expectedCountries
         val viewModel = HomeViewModel(searchCountriesUseCase)
 
         viewModel.loadInitialCountries()
@@ -62,13 +63,13 @@ class HomeViewModelTest {
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(expectedCountries, viewModel.uiState.value.countries)
-        coVerify(exactly = 1) { searchCountriesUseCase("", "All") }
+        coVerify(exactly = 1) { searchCountriesUseCase("", SearchCriteria.ALL) }
     }
 
     @Test
     fun `cuando busca usa la query y el criterio seleccionado`() = runViewModelTest {
         val expectedCountries = listOf(country(name = "Canada"))
-        coEvery { searchCountriesUseCase("English", "Language") } returns expectedCountries
+        coEvery { searchCountriesUseCase("English", SearchCriteria.LANGUAGE) } returns expectedCountries
         val viewModel = HomeViewModel(searchCountriesUseCase)
         viewModel.onQueryChange("English")
         viewModel.onCriteriaChange(SearchCriteria.LANGUAGE)
@@ -78,14 +79,14 @@ class HomeViewModelTest {
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(expectedCountries, viewModel.uiState.value.countries)
-        coVerify(exactly = 1) { searchCountriesUseCase("English", "Language") }
+        coVerify(exactly = 1) { searchCountriesUseCase("English", SearchCriteria.LANGUAGE) }
     }
 
     @Test
     fun `cuando la busqueda no tiene resultados conserva la lista anterior`() = runViewModelTest {
         val initialCountries = listOf(country(name = "Argentina"))
-        coEvery { searchCountriesUseCase("", "All") } returns initialCountries
-        coEvery { searchCountriesUseCase("Atlantis", "Name") } returns emptyList()
+        coEvery { searchCountriesUseCase("", SearchCriteria.ALL) } returns initialCountries
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
         val viewModel = HomeViewModel(searchCountriesUseCase)
         viewModel.loadInitialCountries()
         advanceUntilIdle()
@@ -97,7 +98,7 @@ class HomeViewModelTest {
 
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(initialCountries, viewModel.uiState.value.countries)
-        coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", "Name") }
+        coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) }
     }
 
     private fun runViewModelTest(testBody: suspend kotlinx.coroutines.test.TestScope.() -> Unit) = runTest {

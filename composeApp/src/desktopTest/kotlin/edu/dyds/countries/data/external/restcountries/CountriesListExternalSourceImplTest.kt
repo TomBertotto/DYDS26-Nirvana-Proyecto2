@@ -9,27 +9,27 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class CountriesSearchExternalSourceImplTest {
+class CountriesListExternalSourceImplTest {
 
     private lateinit var restCountriesExternalSource: RestCountriesExternalSource
-    private lateinit var externalSource: CountriesSearchExternalSourceImpl
+    private lateinit var externalSource: CountriesListExternalSourceImpl
 
     @BeforeTest
     fun setup() {
         restCountriesExternalSource = mockk()
-        externalSource = CountriesSearchExternalSourceImpl(restCountriesExternalSource)
+        externalSource = CountriesListExternalSourceImpl(restCountriesExternalSource)
     }
 
     @Test
-    fun `searchCountries convierte la lista remota de RestCountries a lista de Country`() = runTest {
+    fun `getAllCountries convierte la lista remota de RestCountries a lista de Country`() = runTest {
         val remoteCountry = createRemoteCountryMock(
             alpha3 = "ARG",
             commonName = "Argentina",
             officialName = "Argentine Republic"
         )
-        coEvery { restCountriesExternalSource.searchCountries("Argentina") } returns listOf(remoteCountry)
+        coEvery { restCountriesExternalSource.getAllCountries() } returns listOf(remoteCountry)
 
-        val result = externalSource.searchCountries("Argentina")
+        val result = externalSource.getAllCountries()
 
         val expected = Country(
             id = "ARG",
