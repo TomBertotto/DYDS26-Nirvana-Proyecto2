@@ -27,9 +27,13 @@ class HomeViewModel(
 
     fun loadInitialCountries() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase(_uiState.value.query, _uiState.value.selectedCriteria)
-            _uiState.value = _uiState.value.copy(isLoading = false, countries = countries)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            try {
+                val countries = searchCountriesUseCase(_uiState.value.query, _uiState.value.selectedCriteria)
+                _uiState.value = _uiState.value.copy(isLoading = false, countries = countries)
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "An error occurred")
+            }
         }
     }
 
@@ -37,12 +41,16 @@ class HomeViewModel(
         val query = _uiState.value.query
         val criteria = _uiState.value.selectedCriteria
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            val countries = searchCountriesUseCase(query, criteria)
-            _uiState.value = if (countries.isEmpty()) {
-                _uiState.value.copy(isLoading = false)
-            } else {
-                _uiState.value.copy(isLoading = false, countries = countries)
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            try {
+                val countries = searchCountriesUseCase(query, criteria)
+                _uiState.value = if (countries.isEmpty()) {
+                    _uiState.value.copy(isLoading = false)
+                } else {
+                    _uiState.value.copy(isLoading = false, countries = countries)
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(isLoading = false, error = e.message ?: "An error occurred")
             }
         }
     }

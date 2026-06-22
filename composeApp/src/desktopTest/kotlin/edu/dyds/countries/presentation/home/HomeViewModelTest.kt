@@ -17,6 +17,7 @@ import kotlinx.coroutines.test.setMain
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
@@ -99,6 +100,36 @@ class HomeViewModelTest {
         assertFalse(viewModel.uiState.value.isLoading)
         assertEquals(initialCountries, viewModel.uiState.value.countries)
         coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) }
+    }
+
+    @Test
+    fun `cuando la carga inicial lanza una excepcion asigna el error y desactiva la carga`() = runViewModelTest {
+        coEvery { searchCountriesUseCase("", SearchCriteria.ALL) } throws RuntimeException("Network error")
+        val viewModel = HomeViewModel(searchCountriesUseCase)
+
+        viewModel.loadInitialCountries()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+        assertEquals("Network error", viewModel.uiState.value.error)
+    }
+
+    @Test
+    fun `cuando la busqueda exitosa sucede tras un error limpia el error previo`() = runViewModelTest {
+        val expectedCountries = listOf(country(name = "Argentina"))
+        coEvery { searchCountriesUseCase("", SearchCriteria.ALL) } throws RuntimeException("Network error")
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } returns expectedCountries
+        val viewModel = HomeViewModel(searchCountriesUseCase)
+
+        viewModel.loadInitialCountries()
+        advanceUntilIdle()
+        viewModel.onQueryChange("Argentina")
+        viewModel.onCriteriaChange(SearchCriteria.NAME)
+        viewModel.search()
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.error)
+        assertEquals(expectedCountries, viewModel.uiState.value.countries)
     }
 
     private fun runViewModelTest(testBody: suspend kotlinx.coroutines.test.TestScope.() -> Unit) = runTest {

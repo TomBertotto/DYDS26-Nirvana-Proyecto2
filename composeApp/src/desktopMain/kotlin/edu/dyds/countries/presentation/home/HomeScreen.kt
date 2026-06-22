@@ -89,6 +89,7 @@ fun HomeScreen(
 
             when {
                 uiState.isLoading -> LoadingIndicator()
+                uiState.error != null -> ErrorState(uiState.error!!, onRetry = viewModel::loadInitialCountries)
                 uiState.countries.isEmpty() -> EmptyState(uiState.query)
                 else -> GridCountryList(uiState.countries, onCountryClick)
             }
@@ -148,6 +149,34 @@ private fun EmptyState(query: String) {
         contentAlignment = Alignment.Center
     ) {
         Text(if (query.isBlank()) "Search for a country" else "No countries found")
+    }
+}
+
+@Composable
+private fun ErrorState(message: String, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(24.dp)
+        ) {
+            Text(
+                text = "Something went wrong",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.Red
+            )
+            Text(text = message, color = Color.Gray)
+            Button(
+                onClick = onRetry,
+                colors = ButtonDefaults.buttonColors(containerColor = AppColors.PrimaryBlue)
+            ) {
+                Text("Retry")
+            }
+        }
     }
 }
 

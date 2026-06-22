@@ -7,7 +7,8 @@ data class CountriesUiState(
     val query: String = "",
     val selectedCriteria: SearchCriteria = SearchCriteria.ALL,
     val countries: List<Country> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val error: String? = null
 )
 
 val SearchCriteria.label: String
