@@ -97,6 +97,97 @@ class CompareViewModelTest {
         coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) }
     }
 
+    @Test
+    fun `cuando la primera busqueda es exitosa limpia la query`() = runViewModelTest {
+        val expectedCountry = country(name = "Argentina")
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } returns listOf(expectedCountry)
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+        viewModel.onFirstQueryChange("Argentina")
+
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        assertEquals("", viewModel.uiState.value.firstQuery)
+        assertNull(viewModel.uiState.value.firstError)
+        assertEquals(expectedCountry, viewModel.uiState.value.firstCountry)
+    }
+
+    @Test
+    fun `cuando la primera busqueda no tiene resultados asigna el error y conserva la query`() = runViewModelTest {
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+        viewModel.onFirstQueryChange("Atlantis")
+
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isFirstLoading)
+        assertNull(viewModel.uiState.value.firstCountry)
+        assertEquals("Country not found", viewModel.uiState.value.firstError)
+        assertEquals("Atlantis", viewModel.uiState.value.firstQuery)
+    }
+
+    @Test
+    fun `cuando la segunda busqueda no tiene resultados asigna el error y conserva la query`() = runViewModelTest {
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+        viewModel.onSecondQueryChange("Atlantis")
+
+        viewModel.searchSecond()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isSecondLoading)
+        assertNull(viewModel.uiState.value.secondCountry)
+        assertEquals("Country not found", viewModel.uiState.value.secondError)
+        assertEquals("Atlantis", viewModel.uiState.value.secondQuery)
+    }
+
+    @Test
+    fun `cuando la primera busqueda lanza una excepcion asigna el error y desactiva la carga`() = runViewModelTest {
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } throws RuntimeException("Network error")
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+        viewModel.onFirstQueryChange("Argentina")
+
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isFirstLoading)
+        assertNull(viewModel.uiState.value.firstCountry)
+        assertEquals("Network error", viewModel.uiState.value.firstError)
+    }
+
+    @Test
+    fun `cuando la busqueda lanza una excepcion sin mensaje asigna un error generico`() = runViewModelTest {
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } throws RuntimeException()
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+        viewModel.onFirstQueryChange("Argentina")
+
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isFirstLoading)
+        assertEquals("An error occurred", viewModel.uiState.value.firstError)
+    }
+
+    @Test
+    fun `cuando una busqueda exitosa sucede tras un error limpia el error previo`() = runViewModelTest {
+        val expectedCountry = country(name = "Argentina")
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } returns listOf(expectedCountry)
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+
+        viewModel.onFirstQueryChange("Atlantis")
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        viewModel.onFirstQueryChange("Argentina")
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.firstError)
+        assertEquals(expectedCountry, viewModel.uiState.value.firstCountry)
+    }
+
     private fun runViewModelTest(testBody: suspend kotlinx.coroutines.test.TestScope.() -> Unit) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
