@@ -20,6 +20,7 @@ class SearchCountriesUseCaseImpl(
     ): List<Country> = when (criteria) {
         SearchCriteria.ALL -> countries
         SearchCriteria.NAME -> countries.filter { it.name.contains(query, ignoreCase = true) }
+        SearchCriteria.EXACT_NAME -> countries.filter { it.name.equals(query, ignoreCase = true) }
         SearchCriteria.REGION -> countries.filter { it.region.contains(query, ignoreCase = true) }
         SearchCriteria.LANGUAGE -> countries.filter { country ->
             country.languages.any { it.contains(query, ignoreCase = true) }

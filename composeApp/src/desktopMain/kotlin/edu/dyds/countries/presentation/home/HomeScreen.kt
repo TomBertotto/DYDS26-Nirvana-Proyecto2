@@ -194,7 +194,7 @@ private fun CriteriaFilterRow(
             .padding(horizontal = FilterRowHorizontalPadding, vertical = FilterRowVerticalPadding),
         horizontalArrangement = Arrangement.spacedBy(FilterRowSpacing)
     ) {
-        SearchCriteria.entries.forEach { criteria ->
+        homeFilterCriteria.forEach { criteria ->
             val isSelected = selectedCriteria == criteria
             Surface(
                 shape = RoundedCornerShape(16.dp),

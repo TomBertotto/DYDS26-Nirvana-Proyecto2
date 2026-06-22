@@ -43,9 +43,9 @@ class CompareViewModelTest {
     }
 
     @Test
-    fun `cuando busca el primer pais usa el filtro name y guarda el primer resultado`() = runViewModelTest {
+    fun `cuando busca el primer pais usa el filtro de nombre exacto y guarda el primer resultado`() = runViewModelTest {
         val expectedCountry = country(name = "Argentina")
-        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } returns listOf(expectedCountry)
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.EXACT_NAME) } returns listOf(expectedCountry)
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onFirstQueryChange("Argentina")
 
@@ -54,13 +54,13 @@ class CompareViewModelTest {
 
         assertFalse(viewModel.uiState.value.isFirstLoading)
         assertEquals(expectedCountry, viewModel.uiState.value.firstCountry)
-        coVerify(exactly = 1) { searchCountriesUseCase("Argentina", SearchCriteria.NAME) }
+        coVerify(exactly = 1) { searchCountriesUseCase("Argentina", SearchCriteria.EXACT_NAME) }
     }
 
     @Test
-    fun `cuando busca el segundo pais usa el filtro name y guarda el primer resultado`() = runViewModelTest {
+    fun `cuando busca el segundo pais usa el filtro de nombre exacto y guarda el primer resultado`() = runViewModelTest {
         val expectedCountry = country(name = "France")
-        coEvery { searchCountriesUseCase("France", SearchCriteria.NAME) } returns listOf(expectedCountry)
+        coEvery { searchCountriesUseCase("France", SearchCriteria.EXACT_NAME) } returns listOf(expectedCountry)
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onSecondQueryChange("France")
 
@@ -69,7 +69,21 @@ class CompareViewModelTest {
 
         assertFalse(viewModel.uiState.value.isSecondLoading)
         assertEquals(expectedCountry, viewModel.uiState.value.secondCountry)
-        coVerify(exactly = 1) { searchCountriesUseCase("France", SearchCriteria.NAME) }
+        coVerify(exactly = 1) { searchCountriesUseCase("France", SearchCriteria.EXACT_NAME) }
+    }
+
+    @Test
+    fun `cuando la query es una subcadena que no coincide exactamente no asigna pais`() = runViewModelTest {
+        coEvery { searchCountriesUseCase("s", SearchCriteria.EXACT_NAME) } returns emptyList()
+        val viewModel = CompareViewModel(searchCountriesUseCase)
+        viewModel.onFirstQueryChange("s")
+
+        viewModel.searchFirst()
+        advanceUntilIdle()
+
+        assertNull(viewModel.uiState.value.firstCountry)
+        assertEquals("Country not found", viewModel.uiState.value.firstError)
+        coVerify(exactly = 1) { searchCountriesUseCase("s", SearchCriteria.EXACT_NAME) }
     }
 
     @Test
@@ -85,7 +99,7 @@ class CompareViewModelTest {
 
     @Test
     fun `cuando la segunda busqueda no tiene resultados no asigna pais`() = runViewModelTest {
-        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.EXACT_NAME) } returns emptyList()
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onSecondQueryChange("Atlantis")
 
@@ -94,13 +108,13 @@ class CompareViewModelTest {
 
         assertFalse(viewModel.uiState.value.isSecondLoading)
         assertNull(viewModel.uiState.value.secondCountry)
-        coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) }
+        coVerify(exactly = 1) { searchCountriesUseCase("Atlantis", SearchCriteria.EXACT_NAME) }
     }
 
     @Test
     fun `cuando la primera busqueda es exitosa limpia la query`() = runViewModelTest {
         val expectedCountry = country(name = "Argentina")
-        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } returns listOf(expectedCountry)
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.EXACT_NAME) } returns listOf(expectedCountry)
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onFirstQueryChange("Argentina")
 
@@ -114,7 +128,7 @@ class CompareViewModelTest {
 
     @Test
     fun `cuando la primera busqueda no tiene resultados asigna el error y conserva la query`() = runViewModelTest {
-        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.EXACT_NAME) } returns emptyList()
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onFirstQueryChange("Atlantis")
 
@@ -129,7 +143,7 @@ class CompareViewModelTest {
 
     @Test
     fun `cuando la segunda busqueda no tiene resultados asigna el error y conserva la query`() = runViewModelTest {
-        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.EXACT_NAME) } returns emptyList()
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onSecondQueryChange("Atlantis")
 
@@ -144,7 +158,7 @@ class CompareViewModelTest {
 
     @Test
     fun `cuando la primera busqueda lanza una excepcion asigna el error y desactiva la carga`() = runViewModelTest {
-        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } throws RuntimeException("Network error")
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.EXACT_NAME) } throws RuntimeException("Network error")
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onFirstQueryChange("Argentina")
 
@@ -158,7 +172,7 @@ class CompareViewModelTest {
 
     @Test
     fun `cuando la busqueda lanza una excepcion sin mensaje asigna un error generico`() = runViewModelTest {
-        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } throws RuntimeException()
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.EXACT_NAME) } throws RuntimeException()
         val viewModel = CompareViewModel(searchCountriesUseCase)
         viewModel.onFirstQueryChange("Argentina")
 
@@ -172,8 +186,8 @@ class CompareViewModelTest {
     @Test
     fun `cuando una busqueda exitosa sucede tras un error limpia el error previo`() = runViewModelTest {
         val expectedCountry = country(name = "Argentina")
-        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.NAME) } returns emptyList()
-        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.NAME) } returns listOf(expectedCountry)
+        coEvery { searchCountriesUseCase("Atlantis", SearchCriteria.EXACT_NAME) } returns emptyList()
+        coEvery { searchCountriesUseCase("Argentina", SearchCriteria.EXACT_NAME) } returns listOf(expectedCountry)
         val viewModel = CompareViewModel(searchCountriesUseCase)
 
         viewModel.onFirstQueryChange("Atlantis")

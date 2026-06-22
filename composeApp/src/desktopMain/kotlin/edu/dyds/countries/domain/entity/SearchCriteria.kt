@@ -4,5 +4,6 @@ enum class SearchCriteria {
     ALL,
     NAME,
     REGION,
-    LANGUAGE
+    LANGUAGE,
+    EXACT_NAME
 }

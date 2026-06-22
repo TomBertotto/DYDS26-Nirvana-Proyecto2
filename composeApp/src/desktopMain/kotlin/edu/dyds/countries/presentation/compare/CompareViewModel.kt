@@ -92,6 +92,6 @@ class CompareViewModel(
     }
 
     companion object {
-        private val SEARCH_CRITERIA = SearchCriteria.NAME
+        private val SEARCH_CRITERIA = SearchCriteria.EXACT_NAME
     }
 }

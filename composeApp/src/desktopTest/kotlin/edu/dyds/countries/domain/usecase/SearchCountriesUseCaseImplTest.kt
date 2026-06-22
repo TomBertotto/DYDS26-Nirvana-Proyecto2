@@ -51,6 +51,32 @@ class SearchCountriesUseCaseImplTest {
     }
 
     @Test
+    fun `con criterio exact name solo devuelve la coincidencia exacta sin importar mayusculas`() = runTest {
+        val countries = listOf(
+            country(name = "Argentina", region = "Americas"),
+            country(name = "France", region = "Europe")
+        )
+        coEvery { repository.getAllCountries() } returns countries
+
+        val result = useCase(query = "argentina", criteria = SearchCriteria.EXACT_NAME)
+
+        assertEquals(listOf(countries[0]), result)
+    }
+
+    @Test
+    fun `con criterio exact name una subcadena no coincide`() = runTest {
+        val countries = listOf(
+            country(name = "Argentina", region = "Americas"),
+            country(name = "France", region = "Europe")
+        )
+        coEvery { repository.getAllCountries() } returns countries
+
+        val result = useCase(query = "arg", criteria = SearchCriteria.EXACT_NAME)
+
+        assertEquals(emptyList(), result)
+    }
+
+    @Test
     fun `con criterio region filtra por region`() = runTest {
         val countries = listOf(
             country(name = "Argentina", region = "Americas"),

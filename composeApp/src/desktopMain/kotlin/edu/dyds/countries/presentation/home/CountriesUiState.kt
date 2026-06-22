@@ -17,4 +17,8 @@ val SearchCriteria.label: String
         SearchCriteria.NAME -> "Name"
         SearchCriteria.REGION -> "Region"
         SearchCriteria.LANGUAGE -> "Language"
+        SearchCriteria.EXACT_NAME -> "Exact Name"
     }
+
+val homeFilterCriteria: List<SearchCriteria> =
+    SearchCriteria.entries.filter { it != SearchCriteria.EXACT_NAME }
