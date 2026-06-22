@@ -73,12 +73,6 @@ fun HomeScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp)
             )
-            SearchBar(
-                query = uiState.query,
-                onQueryChange = viewModel::onQueryChange,
-                onSearch = viewModel::search
-            )
-
             CriteriaFilterRow(
                 selectedCriteria = uiState.selectedCriteria,
                 onCriteriaSelected = { criteria ->
@@ -86,6 +80,14 @@ fun HomeScreen(
                     viewModel.search()
                 }
             )
+
+            if (uiState.selectedCriteria != SearchCriteria.ALL) {
+                SearchBar(
+                    query = uiState.query,
+                    onQueryChange = viewModel::onQueryChange,
+                    onSearch = viewModel::search
+                )
+            }
 
             when {
                 uiState.isLoading -> LoadingIndicator()
