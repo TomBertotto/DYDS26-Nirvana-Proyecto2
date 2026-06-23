@@ -21,7 +21,7 @@ class HomeViewModel(
     }
 
     fun onCriteriaChange(criteria: SearchCriteria) {
-        val query = if (criteria == SearchCriteria.ALL) "" else _uiState.value.query
+        val query = ""
         _uiState.value = _uiState.value.copy(selectedCriteria = criteria, query = query)
     }
 

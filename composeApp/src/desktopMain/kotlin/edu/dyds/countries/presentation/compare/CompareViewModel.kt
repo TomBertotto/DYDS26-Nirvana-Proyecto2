@@ -79,8 +79,14 @@ class CompareViewModel(
 
     private fun updateError(position: SearchPosition, error: String) {
         _uiState.value = when (position) {
-            SearchPosition.FIRST -> _uiState.value.copy(firstError = error)
-            SearchPosition.SECOND -> _uiState.value.copy(secondError = error)
+            SearchPosition.FIRST -> _uiState.value.copy(
+                firstError = error,
+                firstCountry = null
+            )
+            SearchPosition.SECOND -> _uiState.value.copy(
+                secondError = error,
+                secondCountry = null
+            )
         }
     }
 
