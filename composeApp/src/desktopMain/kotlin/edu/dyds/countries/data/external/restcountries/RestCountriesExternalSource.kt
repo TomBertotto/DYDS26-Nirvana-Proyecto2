@@ -7,7 +7,7 @@ import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 
 private const val BASE_URL = "https://api.restcountries.com/countries/v5"
-private const val API_KEY = "rc_live_87079071953942419c75bc712890f652"
+private const val API_KEY = "rc_live_0e3b86b282454e8895aa19549b256e07"
 private const val AUTHORIZATION_HEADER = "Authorization"
 private const val BEARER_PREFIX = "Bearer "
 private const val LIMIT_PARAMETER = "limit"
