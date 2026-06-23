@@ -2,6 +2,7 @@
 
 package edu.dyds.countries.presentation.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.domain.entity.Weather
 import edu.dyds.countries.presentation.components.AppColors
@@ -80,7 +82,13 @@ private fun CountryDetailsContent(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-        item { HeroImage(country) }
+        item {
+            HeroImage(
+                country = country,
+                weather = weather,
+                isWeatherLoading = isWeatherLoading
+            )
+        }
 
         item {
             CountryHeaderCard(country)
@@ -89,11 +97,6 @@ private fun CountryDetailsContent(
         item { Spacer(modifier = Modifier.height(8.dp)) }
 
         item { QuickStatsCard(country) }
-
-        if (isWeatherLoading || weather != null) {
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-            item { WeatherCard(capital = country.capital, weather = weather, isLoading = isWeatherLoading) }
-        }
 
         item { Spacer(modifier = Modifier.height(16.dp)) }
 
@@ -108,16 +111,43 @@ private fun CountryDetailsContent(
 }
 
 @Composable
-private fun HeroImage(country: Country) {
-    Box {
-        FlagImage(
-            url = country.flagPng,
-            contentDescription = country.name,
+private fun HeroImage(country: Country, weather: Weather?, isWeatherLoading: Boolean) {
+    IntrinsicSize.Min
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp),
-            contentScale = ContentScale.Crop
-        )
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            FlagImage(
+                url = country.flagPng,
+                contentDescription = country.name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(3f / 2f),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        Spacer(Modifier.width(12.dp))
+
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .aspectRatio(3f / 2f)
+        ) {
+            WeatherCard(
+                capital = country.capital,
+                weather = weather,
+                isLoading = isWeatherLoading
+            )
+        }
     }
 }
 
@@ -283,10 +313,10 @@ private fun WeatherCard(capital: String, weather: Weather?, isLoading: Boolean) 
 }
 
 @Composable
-private fun WeatherMetric(label: String, value: String, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Text(label, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+private fun WeatherMetric(label: String, value: String, modifier: Modifier = Modifier, color: Color = Color.Gray) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(label, style = MaterialTheme.typography.bodySmall, color = color.copy(alpha = 0.7f))
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = color)
     }
 }
 
@@ -364,7 +394,3 @@ private fun formatPopulation(population: Long): String {
         else -> population.toString()
     }
 }
-
-
-
-
