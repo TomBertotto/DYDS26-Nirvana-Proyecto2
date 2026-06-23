@@ -49,7 +49,7 @@ fun DetailScreen(
                 title = { Text("Country Details", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = DetailColors.PrimaryBlue)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = AppColors.PrimaryBlue)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -67,16 +67,6 @@ fun DetailScreen(
             )
         }
     }
-}
-
-
-private object DetailColors {
-    val PrimaryBlue = AppColors.PrimaryBlue
-}
-
-private object DetailDimens {
-    val CardPadding = 16.dp
-    val CornerRadius = 16.dp
 }
 
 @Composable
@@ -158,13 +148,13 @@ private fun CountryHeaderCard(country: Country) {
 @Composable
 private fun QuickStatsCard(country: Country) {
     Card(
-        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -221,7 +211,7 @@ private fun StatItem(
         Icon(
             icon,
             contentDescription = null,
-            tint = DetailColors.PrimaryBlue,
+            tint = AppColors.PrimaryBlue,
             modifier = Modifier.size(20.dp)
         )
         Column(modifier = Modifier.weight(1f)) {
@@ -242,13 +232,13 @@ private fun StatItem(
 @Composable
 private fun WeatherCard(capital: String, weather: Weather?, isLoading: Boolean) {
     Card(
-        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
                 if (capital.isBlank()) "Capital Weather" else "$capital Weather",
                 style = MaterialTheme.typography.titleLarge,
@@ -268,7 +258,7 @@ private fun WeatherCard(capital: String, weather: Weather?, isLoading: Boolean) 
                             "${String.format("%.1f", weather.temperature)}°C",
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.Bold,
-                            color = DetailColors.PrimaryBlue
+                            color = AppColors.PrimaryBlue
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
@@ -303,13 +293,13 @@ private fun WeatherMetric(label: String, value: String, modifier: Modifier = Mod
 @Composable
 private fun GeographicInfoCard(country: Country) {
     Card(
-        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
                 "Geographic Information",
                 style = MaterialTheme.typography.titleLarge,
@@ -324,13 +314,13 @@ private fun GeographicInfoCard(country: Country) {
 @Composable
 private fun LanguagesCultureCard(country: Country) {
     Card(
-        shape = RoundedCornerShape(DetailDimens.CornerRadius),
+        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(DetailDimens.CardPadding)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Text(
                 "Languages & Culture",
                 style = MaterialTheme.typography.titleLarge,
@@ -356,7 +346,7 @@ private fun IconDetailRow(icon: ImageVector, label: String, value: String) {
         Icon(
             icon,
             contentDescription = null,
-            tint = DetailColors.PrimaryBlue,
+            tint = AppColors.PrimaryBlue,
             modifier = Modifier.size(20.dp)
         )
         Spacer(Modifier.width(12.dp))

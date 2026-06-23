@@ -29,18 +29,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import edu.dyds.countries.domain.entity.Country
 import edu.dyds.countries.presentation.components.AppColors
 import edu.dyds.countries.presentation.components.COMPARE_NAV_INDEX
 import edu.dyds.countries.presentation.components.CountriesBottomNavigationBar
 import edu.dyds.countries.presentation.utils.FlagImage
-
-private val CardPadding = 16.dp
-private val CardSpacing = 12.dp
-private val PrimaryBlue = AppColors.PrimaryBlue
-private val LightGray = AppColors.ScreenBackground
-private val DividerGray = Color(0xFFE0E0E0)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,7 +46,7 @@ fun CompareScreen(
     var showSecondSearchDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        containerColor = LightGray,
+        containerColor = AppColors.ScreenBackground,
         bottomBar = {
             CountriesBottomNavigationBar(
                 selectedIndex = COMPARE_NAV_INDEX,
@@ -67,8 +60,8 @@ fun CompareScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(CardPadding),
-            verticalArrangement = Arrangement.spacedBy(CardSpacing)
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
                 Row(
@@ -76,7 +69,7 @@ fun CompareScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 ) {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = PrimaryBlue)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", tint = AppColors.PrimaryBlue)
                     }
                     Text(
                         text = "Compare countries",
@@ -159,7 +152,7 @@ private fun CountriesCard(
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp, color = DividerGray)
+                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp, color = Color(0xFFE0E0E0))
                 Text(
                     text = "VS",
                     modifier = Modifier.padding(horizontal = 16.dp),
@@ -167,7 +160,7 @@ private fun CountriesCard(
                     color = Color.Gray,
                     fontWeight = FontWeight.Bold
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp, color = DividerGray)
+                HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp, color = Color(0xFFE0E0E0))
             }
 
             CountryRow(
@@ -223,7 +216,7 @@ private fun CountryRow(
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
-                color = LightGray
+                color = AppColors.ScreenBackground
             ) {}
         }
 
@@ -250,7 +243,7 @@ private fun CountryRow(
                             Icons.Default.LocationOn,
                             contentDescription = null,
                             modifier = Modifier.size(12.dp),
-                            tint = PrimaryBlue
+                            tint = AppColors.PrimaryBlue
                         )
                         Text(
                             text = country.capital,
@@ -349,7 +342,7 @@ private fun CompareStatRow(
                 Icon(
                     icon,
                     contentDescription = null,
-                    tint = PrimaryBlue,
+                    tint = AppColors.PrimaryBlue,
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(Modifier.width(4.dp))
@@ -374,7 +367,7 @@ private fun StatValueBox(value: String, modifier: Modifier, highlighted: Boolean
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(10.dp),
-        color = if (highlighted) AppColors.LightBlueChip else LightGray
+        color = if (highlighted) AppColors.LightBlueChip else AppColors.ScreenBackground
     ) {
         Text(
             text = value,
@@ -383,7 +376,7 @@ private fun StatValueBox(value: String, modifier: Modifier, highlighted: Boolean
                 .fillMaxWidth(),
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = if (highlighted) FontWeight.Bold else FontWeight.SemiBold,
-            color = if (highlighted) PrimaryBlue else Color(0xFF212121),
+            color = if (highlighted) AppColors.PrimaryBlue else Color(0xFF212121),
             textAlign = TextAlign.Center
         )
     }
