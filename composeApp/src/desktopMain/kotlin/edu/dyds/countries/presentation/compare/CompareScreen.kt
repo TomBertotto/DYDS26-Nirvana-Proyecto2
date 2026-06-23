@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Language
@@ -315,6 +316,11 @@ private fun ComparisonStatsCard(
             val langs2 = country2?.languages?.joinToString(", ").orEmpty()
             HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
             CompareStatRow("Languages", langs1, langs2, Icons.Default.Chat)
+
+            val currency1 = country1?.currencies?.joinToString(", ") { it.code }.orEmpty()
+            val currency2 = country2?.currencies?.joinToString(", ") { it.code }.orEmpty()
+            HorizontalDivider(thickness = 0.5.dp, color = Color(0xFFF0F0F0))
+            CompareStatRow("Currency", currency1, currency2, Icons.Default.AttachMoney)
         }
     }
 }
