@@ -21,7 +21,7 @@ private data class BottomNavItem(val label: String, val icon: ImageVector, val i
 
 private val bottomNavItems = listOf(
     BottomNavItem("Explore", Icons.Filled.Search, EXPLORE_NAV_INDEX),
-    BottomNavItem("Versus", Icons.Filled.Star, COMPARE_NAV_INDEX)
+    BottomNavItem("Compare", Icons.Filled.Star, COMPARE_NAV_INDEX)
 )
 
 @Composable
