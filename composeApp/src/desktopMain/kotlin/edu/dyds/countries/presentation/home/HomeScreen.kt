@@ -35,11 +35,6 @@ import edu.dyds.countries.presentation.components.CountriesBottomNavigationBar
 import edu.dyds.countries.presentation.utils.FlagImage
 import edu.dyds.countries.presentation.utils.LoadingIndicator
 
-private val SearchBarPadding = 16.dp
-private val FilterRowHorizontalPadding = 16.dp
-private val FilterRowVerticalPadding = 8.dp
-private val FilterRowSpacing = 8.dp
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -110,7 +105,7 @@ private fun SearchBar(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(SearchBarPadding),
+            .padding(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(modifier = Modifier
@@ -191,8 +186,8 @@ private fun CriteriaFilterRow(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = FilterRowHorizontalPadding, vertical = FilterRowVerticalPadding),
-        horizontalArrangement = Arrangement.spacedBy(FilterRowSpacing)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         homeFilterCriteria.forEach { criteria ->
             val isSelected = selectedCriteria == criteria
