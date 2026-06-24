@@ -72,8 +72,8 @@ class HomeViewModelTest {
         val expectedCountries = listOf(country(name = "Canada"))
         coEvery { searchCountriesUseCase("English", SearchCriteria.LANGUAGE) } returns expectedCountries
         val viewModel = HomeViewModel(searchCountriesUseCase)
-        viewModel.onQueryChange("English")
         viewModel.onCriteriaChange(SearchCriteria.LANGUAGE)
+        viewModel.onQueryChange("English")
 
         viewModel.search()
         advanceUntilIdle()
@@ -91,8 +91,8 @@ class HomeViewModelTest {
         val viewModel = HomeViewModel(searchCountriesUseCase)
         viewModel.loadInitialCountries()
         advanceUntilIdle()
-        viewModel.onQueryChange("Atlantis")
         viewModel.onCriteriaChange(SearchCriteria.NAME)
+        viewModel.onQueryChange("Atlantis")
 
         viewModel.search()
         advanceUntilIdle()
@@ -123,8 +123,8 @@ class HomeViewModelTest {
 
         viewModel.loadInitialCountries()
         advanceUntilIdle()
-        viewModel.onQueryChange("Argentina")
         viewModel.onCriteriaChange(SearchCriteria.NAME)
+        viewModel.onQueryChange("Argentina")
         viewModel.search()
         advanceUntilIdle()
 
