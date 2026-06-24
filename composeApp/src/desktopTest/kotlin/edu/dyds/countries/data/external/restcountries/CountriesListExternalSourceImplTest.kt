@@ -50,4 +50,16 @@ class CountriesListExternalSourceImplTest {
 
         assertEquals(listOf(expected), result)
     }
+
+    @Test
+    fun `getAllCountries retorna lista vacia cuando RestCountries devuelve lista vacia`() = runTest {
+        val remoteCountry = emptyList<RestCountriesRemoteCountry>()
+        coEvery { restCountriesExternalSource.getAllCountries() } returns remoteCountry
+
+        val result = externalSource.getAllCountries()
+
+        val expected = emptyList<Country>()
+
+        assertEquals(expected, result)
+    }
 }
